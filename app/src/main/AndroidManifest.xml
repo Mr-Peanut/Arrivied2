@@ -31,7 +31,7 @@
             android:name="com.amap.api.v2.apikey"
             android:value="571282966fe766c83a8438c95beeb7d2" />
         <activity android:name=".view.MainActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar">
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

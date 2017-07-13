@@ -50,11 +50,6 @@ public class MainActivity extends AppCompatActivity implements LocationReceiver.
         initView();
         initReceiver();
         bindLocationService();
-
-
-
-
-//        LocateIntentService.startLocateOneTime(this,null,null);
     }
 
     private void initView() {
@@ -70,13 +65,14 @@ public class MainActivity extends AppCompatActivity implements LocationReceiver.
                     Toast.makeText(MainActivity.this,"搜索的内容不能为空",Toast.LENGTH_SHORT).show();
                     return;
                 }
+                if(city==null){
+                    Toast.makeText(MainActivity.this,"城市不能为空",Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 busStationQuery=new BusStationQuery(searchTarget,city);
                // 设置查询结果的监听
                 busStationSearch.setQuery(busStationQuery);
-
                 busStationSearch.searchBusStationAsyn();
-
-
             }
         });
     }
@@ -100,9 +96,10 @@ public class MainActivity extends AppCompatActivity implements LocationReceiver.
 
     @Override
     public void onBroadcastReceive(Intent intent) {
-        LOGUtil.logE(this, "onLocationResultReceive");
+
         AMapLocation result=intent.getParcelableExtra("LocationResult");
         city=result.getCity();
+        LOGUtil.logE(this, city);
         showText.setText(result.getCity());
 
     }
@@ -119,17 +116,21 @@ public class MainActivity extends AppCompatActivity implements LocationReceiver.
     @Override
     public void onBusStationSearched(BusStationResult busStationResult, int i) {
         LOGUtil.logE(this,"busstationResult"+String.valueOf(i)+" "+busStationResult.getPageCount());
-        LOGUtil.logE(this,busStationResult.getBusStations().get(0).getBusStationName());
-        List<BusStationItem> resultList=busStationResult.getBusStations();
-        if (resultList.size()==0){
-            showText.setText("noResult");
+        StringBuffer stringBuffer=new StringBuffer();
+        for(int k=0;k<busStationResult.getBusStations().size();k++){
+            BusStationItem item=busStationResult.getBusStations().get(k);
+            stringBuffer.append(item.getLatLonPoint()+item.getBusStationName());
         }
-        else {
-            for(int k=0;k<=resultList.size();i++){
-               showText.append( resultList.get(k).getBusStationName());
-            }
-        }
-
+        showText.append(stringBuffer);
+//        List<BusStationItem> resultList=busStationResult.getBusStations();
+//        if (resultList.size()==0){
+//            showText.setText("noResult");
+//        }
+//        else {
+//            for(int k=0;k<=resultList.size();i++){
+//               showText.append( resultList.get(k).getBusStationName());
+//            }
+//        }
     }
 
     private class LocationServiceConnection implements ServiceConnection {
