@@ -24,29 +24,31 @@ import com.amap.api.services.busline.BusStationResult;
 import com.amap.api.services.busline.BusStationSearch;
 import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.bean.LocationClient;
+import com.example.guans.arrivied.service.GeoFenceService;
 import com.example.guans.arrivied.service.LocateService;
 import com.example.guans.arrivied.receiver.LocationReceiver;
 import com.example.guans.arrivied.util.LOGUtil;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements LocationReceiver.LocationReceiveListener,BusStationSearch.OnBusStationSearchListener {
+public class MainActivity extends AppCompatActivity implements LocationReceiver.LocationReceiveListener{
     private LocationReceiver receiver;
     private LocationClient locationClient;
     private ServiceConnection locationServiceConnection;
     private TextView showText;
-    private TextView busSearchView;
-    private Button searchButton;
-    private BusStationQuery busStationQuery;
+    private TextView busSearch;
+    private TextView locationCity;
+
     private String city;
-    private BusStationSearch busStationSearch;
+    private BusStationItem targetStationItem;
+    private TextView targetStationText;
+    private Button start_watch;
+    public static final int BUS_STATION_SEARCH_RESULT_CODE=1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        busStationSearch = new BusStationSearch(MainActivity.this, null);
-        busStationSearch.setOnBusStationSearchListener(MainActivity.this);
         initView();
         initReceiver();
         bindLocationService();
@@ -54,25 +56,30 @@ public class MainActivity extends AppCompatActivity implements LocationReceiver.
 
     private void initView() {
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
-        busSearchView= (TextView) findViewById(R.id.bus_search_view);
-        searchButton= (Button) findViewById(R.id.searchButton);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        busSearch= (TextView) findViewById(R.id.bus_search);
         showText= (TextView) findViewById(R.id.showText);
-        searchButton.setOnClickListener(new View.OnClickListener() {
+        locationCity= (TextView) findViewById(R.id.locationCity);
+        targetStationText= (TextView) findViewById(R.id.station_result);
+        start_watch= (Button) findViewById(R.id.start_watch);
+        busSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String searchTarget=String.valueOf(busSearchView.getText()).trim();
-                if(searchTarget.length()==0){
-                    Toast.makeText(MainActivity.this,"搜索的内容不能为空",Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if(city==null){
-                    Toast.makeText(MainActivity.this,"城市不能为空",Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                busStationQuery=new BusStationQuery(searchTarget,city);
-               // 设置查询结果的监听
-                busStationSearch.setQuery(busStationQuery);
-                busStationSearch.searchBusStationAsyn();
+                Intent stationSearchIntent = new Intent(MainActivity.this,SearchActivity.class);
+                stationSearchIntent.putExtra("LOCATION_CITY",city);
+                startActivityForResult(stationSearchIntent,BUS_STATION_SEARCH_RESULT_CODE);
+            }
+        });
+        start_watch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent watchIntent=new Intent(MainActivity.this, GeoFenceService.class);
+                watchIntent.setAction("com.example.guans.arrivied.service.GeoFenceService.ADD_GEOFENCE");
+                // dPoint.setLatitude(intent.getDoubleExtra("Latitude", 0));
+//                dPoint.setLongitude(intent.getDoubleExtra("Longitude", 0));
+                watchIntent.putExtra("Latitude",targetStationItem.getLatLonPoint().getLatitude());
+                watchIntent.putExtra("Longitude",targetStationItem.getLatLonPoint().getLongitude());
+                startService(watchIntent);
             }
         });
     }
@@ -96,12 +103,10 @@ public class MainActivity extends AppCompatActivity implements LocationReceiver.
 
     @Override
     public void onBroadcastReceive(Intent intent) {
-
         AMapLocation result=intent.getParcelableExtra("LocationResult");
         city=result.getCity();
         LOGUtil.logE(this, city);
-        showText.setText(result.getCity());
-
+        locationCity.setText(result.getCity());
     }
     @Override
     protected void onDestroy() {
@@ -114,23 +119,29 @@ public class MainActivity extends AppCompatActivity implements LocationReceiver.
     }
 
     @Override
-    public void onBusStationSearched(BusStationResult busStationResult, int i) {
-        LOGUtil.logE(this,"busstationResult"+String.valueOf(i)+" "+busStationResult.getPageCount());
-        StringBuffer stringBuffer=new StringBuffer();
-        for(int k=0;k<busStationResult.getBusStations().size();k++){
-            BusStationItem item=busStationResult.getBusStations().get(k);
-            stringBuffer.append(item.getLatLonPoint()+item.getBusStationName());
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode){
+            case BUS_STATION_SEARCH_RESULT_CODE:
+                if(resultCode==RESULT_OK){
+                    targetStationItem=data.getParcelableExtra("STATION_ITEM") ;
+                    initViewAfterGetStation();
+                }
+                break;
+            default:
+                break;
         }
-        showText.append(stringBuffer);
-//        List<BusStationItem> resultList=busStationResult.getBusStations();
-//        if (resultList.size()==0){
-//            showText.setText("noResult");
-//        }
-//        else {
-//            for(int k=0;k<=resultList.size();i++){
-//               showText.append( resultList.get(k).getBusStationName());
-//            }
-//        }
+    }
+
+    private void initViewAfterGetStation() {
+        if(targetStationItem!=null){
+            targetStationText.append(targetStationItem.getBusStationName());
+            start_watch.setClickable(true);
+        }  else {
+            showText.setText("没有拿到任何结果");
+        }
+
+
     }
 
     private class LocationServiceConnection implements ServiceConnection {

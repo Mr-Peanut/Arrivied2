@@ -21,10 +21,9 @@ public class GeoFenceService extends Service implements GeoFenceListener {
     public static final int ADD_DPOINT = 1;
     //定义接收广播的action字符串
     public static final String GEOFENCE_BROADCAST_ACTION = "com.location.apis.geofencedemo.broadcast";
+    public static final String ADD_DPOINT_ACTION="com.example.guans.arrivied.service.GeoFenceService.ADD_GEOFENCE";
     private GeoFenceClient mGeoFenceClient;
     private GeoFenceClientProxy mGeoFenceClientProxy;
-
-
     public GeoFenceService() {
     }
 
@@ -42,15 +41,12 @@ public class GeoFenceService extends Service implements GeoFenceListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (flags == GeoFenceService.ADD_DPOINT) {
             //先实现单点提醒，后续可以实现多点提醒
             mGeoFenceClient.removeGeoFence();
             DPoint dPoint = new DPoint();
             dPoint.setLatitude(intent.getDoubleExtra("Latitude", 0));
             dPoint.setLongitude(intent.getDoubleExtra("Longitude", 0));
             mGeoFenceClient.addGeoFence(dPoint, 10, "BUS_STATION");
-        }
-
         return Service.START_STICKY;
     }
 

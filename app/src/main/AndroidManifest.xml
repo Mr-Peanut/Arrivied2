@@ -50,7 +50,11 @@
         <service
             android:name=".service.GeoFenceService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.example.guans.arrivied.service.GeoFenceService.ADD_GEOFENCE"/>
+            </intent-filter>
+        </service>
 
         <activity android:name=".view.MapActivity" />
         <activity android:name=".view.SearchActivity"></activity>

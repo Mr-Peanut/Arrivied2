@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">Arrivied</string>
     <string name="city">city</string>
+    <string name="start_watch">设置提醒</string>
+    <string name="target_station">您选取了：</string>
 </resources>
