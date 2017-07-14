@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements LocationReceiver.
     private LocationClient locationClient;
     private ServiceConnection locationServiceConnection;
     private TextView showText;
-    private EditText busSearchView;
+    private TextView busSearchView;
     private Button searchButton;
     private BusStationQuery busStationQuery;
     private String city;
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements LocationReceiver.
 
     private void initView() {
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
-        busSearchView= (EditText) findViewById(R.id.bus_search_view);
+        busSearchView= (TextView) findViewById(R.id.bus_search_view);
         searchButton= (Button) findViewById(R.id.searchButton);
         showText= (TextView) findViewById(R.id.showText);
         searchButton.setOnClickListener(new View.OnClickListener() {

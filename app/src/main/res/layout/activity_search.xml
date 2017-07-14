@@ -4,11 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.example.guans.arrivied.view.SearchActivity">
-
-    <SearchView
-        android:id="@+id/bus_search_view"
+    <android.support.v7.widget.Toolbar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-         />
+        android:background="@color/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme">
+    </android.support.v7.widget.Toolbar>
+    <include layout="@layout/bus_search_window"/>
 </LinearLayout>

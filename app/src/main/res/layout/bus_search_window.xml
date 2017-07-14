@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/search_bus_root"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp">
+
+    <SearchView
+        android:id="@+id/bus_search"
+        android:layout_width="match_parent"
+        android:layout_height="63dp" />
+    <TextView
+        android:layout_marginTop="5dp"
+        android:id="@+id/statue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="10dp"
+        android:text="TextView"
+        android:visibility="gone"/>
+    <android.support.v7.widget.RecyclerView
+        android:layout_marginTop="5dp"
+        android:id="@+id/search_result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+</LinearLayout>
