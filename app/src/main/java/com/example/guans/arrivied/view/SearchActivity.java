@@ -5,10 +5,15 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.CursorAdapter;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import  android.widget.SearchView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +32,9 @@ public class SearchActivity extends AppCompatActivity implements BusLineSearch.O
     private SearchView busSearchView;
     private String city;
     private TextView statuText;
+    private ListView sugesstList;
+    private RecyclerView result_list;
+    private ArrayAdapter<String> sugesstAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,11 +47,14 @@ public class SearchActivity extends AppCompatActivity implements BusLineSearch.O
     private void initData() {
         Intent startIntent=getIntent();
         city=startIntent.getStringExtra("LOCATION_CITY");
+        sugesstAdapter=new ArrayAdapter<>(SearchActivity.this,android.R.layout.simple_list_item_1);
     }
 
     private void initView() {
         busSearchView= (SearchView) findViewById(R.id.bus_search);
         busSearchView.setSubmitButtonEnabled(true);
+        sugesstList= (ListView) findViewById(R.id.sugesst_result);
+        result_list= (RecyclerView) findViewById(R.id.search_result_list);
          busSearchView.setOnSearchClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View view) {
@@ -78,7 +89,6 @@ public class SearchActivity extends AppCompatActivity implements BusLineSearch.O
             statuText.setText("没有获取城市信息");
         }
     }
-
     private void initBusSearch() {
         //        busStationSearch = new BusStationSearch(MainActivity.this, null);
 //        busStationSearch.setOnBusStationSearchListener(MainActivity.this);
@@ -86,6 +96,8 @@ public class SearchActivity extends AppCompatActivity implements BusLineSearch.O
 
     @Override
     public void onBusLineSearched(BusLineResult busLineResult, int i) {
+
+
 
     }
 }

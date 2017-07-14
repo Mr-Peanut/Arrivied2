@@ -57,7 +57,10 @@
         </service>
 
         <activity android:name=".view.MapActivity" />
-        <activity android:name=".view.SearchActivity"></activity>
+        <activity android:name=".view.SearchActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            >
+        </activity>
     </application>
 
 </manifest>
