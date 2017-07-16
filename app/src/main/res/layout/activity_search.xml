@@ -13,5 +13,9 @@
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme">
     </android.support.v7.widget.Toolbar>
-    <include layout="@layout/bus_search_window"/>
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </FrameLayout>
 </LinearLayout>

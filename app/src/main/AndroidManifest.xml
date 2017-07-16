@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.guans.arrivied">
+
     <!-- 用于进行网络定位 -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- 用于访问GPS定位 -->
@@ -30,7 +31,11 @@
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="571282966fe766c83a8438c95beeb7d2" />
-        <activity android:name=".view.MainActivity"
+
+        <activity
+            android:name=".view.MainActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,6 +43,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service android:name="com.amap.api.location.APSService" />
         <service
             android:name=".service.LocateService"
@@ -49,18 +55,33 @@
         </service>
         <service
             android:name=".service.GeoFenceService"
+            android:stopWithTask="false"
             android:enabled="true"
-            android:exported="true" >
+            android:exported="false">
             <intent-filter>
-                <action android:name="com.example.guans.arrivied.service.GeoFenceService.ADD_GEOFENCE"/>
+                <action android:name="com.example.guans.arrivied.service.GeoFenceService.ADD_GEOFENCE" />
+                <action android:name="com.example.guan.arrived.geofenceservice.SERVICE_BIND"/>
             </intent-filter>
         </service>
 
-        <activity android:name=".view.MapActivity" />
-        <activity android:name=".view.SearchActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-            >
+        <activity
+            android:name=".view.MapActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".view.SearchActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+
         </activity>
+
+        <receiver
+            android:name=".receiver.GeoFenceReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.location.apis.geofencedemo.broadcast"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

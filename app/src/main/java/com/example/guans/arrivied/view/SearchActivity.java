@@ -1,103 +1,59 @@
 package com.example.guans.arrivied.view;
 
-import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
+import android.net.Uri;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.CursorAdapter;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import  android.widget.SearchView;
-import android.widget.SimpleAdapter;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.FrameLayout;
 
-import com.amap.api.services.busline.BusLineQuery;
-import com.amap.api.services.busline.BusLineResult;
-import com.amap.api.services.busline.BusLineSearch;
-import com.amap.api.services.busline.BusStationQuery;
-import com.amap.api.services.busline.BusStationSearch;
+import com.amap.api.services.busline.BusLineItem;
+import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
+import com.example.guans.arrivied.fragment.BusSearchFragment;
+import com.example.guans.arrivied.fragment.StationChosenFragment;
+import com.example.guans.arrivied.util.LOGUtil;
 
-public class SearchActivity extends AppCompatActivity implements BusLineSearch.OnBusLineSearchListener{
-    private BusStationQuery busStationQuery;
-    private BusStationSearch busStationSearch;
-    private BusLineSearch busLineSearch;
-    private BusLineQuery busLineQuery;
-    private SearchView busSearchView;
-    private String city;
-    private TextView statuText;
-    private ListView sugesstList;
-    private RecyclerView result_list;
-    private ArrayAdapter<String> sugesstAdapter;
+public class SearchActivity extends AppCompatActivity implements BusSearchFragment.OnFragmentInteractionListener,StationChosenFragment.OnFragmentInteractionListener{
+    private BusSearchFragment busSearchFragment;
+    private StationChosenFragment stationChosenFragment;
+    private FragmentManager fragmentManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-        initData();
-        initView();
-        initBusSearch();
+        fragmentManager=getSupportFragmentManager();
+        busSearchFragment=BusSearchFragment.newInstance("one","two");
+        fragmentManager.beginTransaction()
+                .add(R.id.container,busSearchFragment,"searchFragmet").commit();
+//                replace(R.id.container,busSearchFragment).commit();
     }
-
-    private void initData() {
-        Intent startIntent=getIntent();
-        city=startIntent.getStringExtra("LOCATION_CITY");
-        sugesstAdapter=new ArrayAdapter<>(SearchActivity.this,android.R.layout.simple_list_item_1);
-    }
-
-    private void initView() {
-        busSearchView= (SearchView) findViewById(R.id.bus_search);
-        busSearchView.setSubmitButtonEnabled(true);
-        sugesstList= (ListView) findViewById(R.id.sugesst_result);
-        result_list= (RecyclerView) findViewById(R.id.search_result_list);
-         busSearchView.setOnSearchClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View view) {
-                String searchTarget= busSearchView.getQuery().toString().trim();
-                 if(searchTarget.length()==0){
-                     Toast.makeText(SearchActivity.this,"搜索内容不能为空",Toast.LENGTH_SHORT).show();
-                     busSearchView.requestFocus();
-                 }else {
-                     busLineQuery=new BusLineQuery(city, BusLineQuery.SearchType.BY_LINE_NAME,searchTarget);
-                     busLineSearch=new BusLineSearch(SearchActivity.this,busLineQuery);
-                     busLineSearch.setOnBusLineSearchListener(SearchActivity.this);
-                     busLineSearch.searchBusLineAsyn();
-                 }
-             }
-         });
-        busSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                return false;
-            }
-        });
-        statuText= (TextView) findViewById(R.id.statue);
-        statuText.setVisibility(View.VISIBLE);
-        if(city!=null){
-            statuText.setText(city);
-        }else {
-            statuText.setText("没有获取城市信息");
-        }
-    }
-    private void initBusSearch() {
-        //        busStationSearch = new BusStationSearch(MainActivity.this, null);
-//        busStationSearch.setOnBusStationSearchListener(MainActivity.this);
+    @Override
+    public void onFragmentInteraction(Uri uri) {
     }
 
     @Override
-    public void onBusLineSearched(BusLineResult busLineResult, int i) {
+    public void onStationItemClick(BusStationItem busStationItem) {
+        Intent intent=new Intent();
+        if(busStationItem!=null){
+            intent.putExtra("STATION_ITEM",busStationItem);
+            setResult(RESULT_OK,intent);
+        }
+        finish();
+    }
 
-
+    @Override
+    public void onLineItemClicked(BusLineItem targetLineItem) {
+        //打开站点选择fragment
+        getIntent().putExtra("BUS_LINE_ITEM",targetLineItem);
+        LOGUtil.logE(this,targetLineItem.getBusLineName());
+        if(stationChosenFragment==null) {
+            stationChosenFragment=StationChosenFragment.newInstance("1","2");
+            fragmentManager.beginTransaction().add(R.id.container,stationChosenFragment,"stationChosenFragment").commit();
+        }else
+            stationChosenFragment.flushData();
+        fragmentManager.beginTransaction().show(stationChosenFragment).hide(busSearchFragment).addToBackStack("searchFragmet").commit();
 
     }
 }
+

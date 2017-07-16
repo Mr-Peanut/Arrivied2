@@ -4,16 +4,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.example.guans.arrivied.util.LOGUtil;
-
 /**
  * Created by shiqian.guan on 2017/7/11.
  */
 
-public class LocationReceiver extends BroadcastReceiver {
-    private LocationReceiveListener mListener;
+public class ControllerReceiver extends BroadcastReceiver {
+    private ControlReceiveListener mListener;
 
-    public void setLocationListener(LocationReceiveListener mListener) {
+    public void setControlListener(ControlReceiveListener mListener) {
         this.mListener = mListener;
     }
 
@@ -23,7 +21,7 @@ public class LocationReceiver extends BroadcastReceiver {
             mListener.onBroadcastReceive(intent);
         }
     }
-    public interface LocationReceiveListener{
+    public interface ControlReceiveListener {
         void onBroadcastReceive(Intent intent);
     }
 }
