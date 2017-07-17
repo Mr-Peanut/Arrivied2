@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.amap.api.location.AMapLocation;
+import com.amap.api.maps2d.model.Marker;
 import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.bean.GeoFenceClientProxy;
@@ -22,7 +23,6 @@ import com.example.guans.arrivied.bean.LocationClient;
 import com.example.guans.arrivied.service.GeoFenceService;
 import com.example.guans.arrivied.service.LocateService;
 import com.example.guans.arrivied.receiver.ControllerReceiver;
-import com.example.guans.arrivied.util.LOGUtil;
 
 
 public class MainActivity extends AppCompatActivity implements ControllerReceiver.ControlReceiveListener {
@@ -35,7 +35,6 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
     private Runnable locationNoResultRunnable;
     private GeoFenceClientProxy geoFenceClientProxy;
     private GeoFenServiceConnection geoFenceConnection;
-
     private String city;
     private BusStationItem targetStationItem;
     private TextView targetStationText;
@@ -68,6 +67,12 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         bindService(geoFenceServiceIntent,geoFenceConnection,BIND_AUTO_CREATE);
     }
     private void initView() {
+       findViewById(R.id.openMap).setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               startActivity(new Intent(MainActivity.this,MapActivity.class));
+           }
+       });
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         TextView busSearch = (TextView) findViewById(R.id.bus_search);

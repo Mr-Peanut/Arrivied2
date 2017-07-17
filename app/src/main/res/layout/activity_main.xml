@@ -76,6 +76,11 @@
                 android:clickable="false"
                 android:text="@string/start_watch"
                 />
+            <Button
+                android:id="@+id/openMap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="打开地图"/>
 
         </LinearLayout>
     </ScrollView>
