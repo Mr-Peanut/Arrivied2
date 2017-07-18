@@ -70,7 +70,9 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
        findViewById(R.id.openMap).setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View view) {
-               startActivity(new Intent(MainActivity.this,MapActivity.class));
+               Intent mapIntent=new Intent(MainActivity.this,MapActivity.class);
+               mapIntent.putExtra("StationItem",targetStationItem);
+               startActivity(mapIntent);
            }
        });
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
