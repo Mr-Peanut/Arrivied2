@@ -42,7 +42,6 @@ public class MapActivity extends AppCompatActivity implements AMap.OnMarkerDragL
         }
 
     }
-
     private void showLine(Intent dataIntent) {
     }
 

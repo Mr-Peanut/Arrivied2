@@ -4,12 +4,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.amap.api.services.busline.BusLineItem;
@@ -36,11 +39,11 @@ public class StationChosenFragment extends Fragment implements LineAdapter.OnSta
     private String mParam1;
     private String mParam2;
     private BusLineItem busLineItem;
-    private RecyclerView stationList;
-    private LineAdapter lineAdapter;
     private TextView tittle;
-
+    private MapFragment mapFragment;
+    private StationItemFragment stationItemFragment;
     private OnFragmentInteractionListener mListener;
+    private FragmentManager fragmentManager;
 
     public StationChosenFragment() {
         // Required empty public constructor
@@ -71,15 +74,17 @@ public class StationChosenFragment extends Fragment implements LineAdapter.OnSta
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        initData();
-
+        initData(savedInstanceState);
+        fragmentManager=getChildFragmentManager();
     }
 
-    private void initData() {
+    private void initData(Bundle savedInstanceState ) {
         Intent intent=getActivity().getIntent();
         busLineItem=intent.getParcelableExtra("BUS_LINE_ITEM");
-        lineAdapter=new LineAdapter(getContext(),busLineItem);
-        lineAdapter.setStationItemClickListener(this);
+        if(stationItemFragment==null&&savedInstanceState!=null) {
+            stationItemFragment = (StationItemFragment) fragmentManager.getFragment(savedInstanceState, "STATION_ITEM_FRAGMENT");
+            mapFragment = (MapFragment) fragmentManager.getFragment(savedInstanceState, "MAP_FRAGMENT");
+        }
     }
 
     @Override
@@ -88,7 +93,7 @@ public class StationChosenFragment extends Fragment implements LineAdapter.OnSta
         // Inflate the layout for this fragment
         LOGUtil.logE(this,"OnceateView");
         View view=inflater.inflate(R.layout.fragment_station_chosen, container, false);
-        initView(view);
+        initView(view,savedInstanceState);
         return view ;
     }
 
@@ -105,17 +110,49 @@ public class StationChosenFragment extends Fragment implements LineAdapter.OnSta
 
     }
     public void flushData(){
-        lineAdapter.setBusLineItem(busLineItem=getActivity().getIntent().getParcelableExtra("BUS_LINE_ITEM"));
+//        lineAdapter.setBusLineItem(busLineItem=getActivity().getIntent().getParcelableExtra("BUS_LINE_ITEM"));
+        //刷新对应fragment的数据
         tittle.setText(busLineItem.getBusLineName());
     }
 
-    private void initView(View view) {
+    private void initView(View view, final Bundle savedInstanceStat) {
         tittle=view.findViewById(R.id.line_info);
         tittle.setText(busLineItem.getBusLineName());
-        LOGUtil.logE(this,busLineItem.getBusLineName());
-        stationList=view.findViewById(R.id.stationList);
-        stationList.setLayoutManager(new LinearLayoutManager(getContext()));
-        stationList.setAdapter(lineAdapter);
+        RadioGroup showStyleChoose=view.findViewById(R.id.show_style_choose);
+        initStationFragment();
+        showStyleChoose.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, @IdRes int i) {
+                switch (i){
+                    case R.id.show_in_list:
+                        fragmentManager.beginTransaction().show(stationItemFragment).commit();
+                        if(mapFragment!=null){
+                            fragmentManager.beginTransaction().hide(mapFragment).commit();
+                        }
+                        break;
+                    case R.id.show_in_map:
+                        if(mapFragment==null){
+                            mapFragment=MapFragment.newInstance("BUS_LINE_ITEM","MAP_FRAGMENT");
+                            LOGUtil.logE(this,"putLine"+busLineItem.getBusLineName());
+                            mapFragment.getArguments().putParcelable("LINE_ITEM",busLineItem);
+                            fragmentManager.beginTransaction().add(R.id.line_item_window,mapFragment,"MAP_FRAGMENT").commit();
+                        }
+                        fragmentManager.beginTransaction().show(mapFragment).commit();
+                        if(stationItemFragment!=null){
+                            fragmentManager.beginTransaction().hide(stationItemFragment).commit();
+                        }
+                        break;
+                }
+            }
+        });
+    }
+    private void initStationFragment() {
+        if(stationItemFragment==null){
+            stationItemFragment=StationItemFragment.newInstance("BUS_LINE_ITEM","STATION_ITEM_FRAGMENT");
+            stationItemFragment.getArguments().putParcelable("LINE_ITEM",busLineItem);
+            LOGUtil.logE(this,"putLine"+busLineItem.getBusLineName());
+            fragmentManager.beginTransaction().add(R.id.line_item_window,stationItemFragment,"STATION_ITEM_FRAGMENT").commit();
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event

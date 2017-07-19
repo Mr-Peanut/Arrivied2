@@ -11,10 +11,12 @@ import com.amap.api.services.busline.BusLineItem;
 import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.fragment.BusSearchFragment;
+import com.example.guans.arrivied.fragment.MapFragment;
 import com.example.guans.arrivied.fragment.StationChosenFragment;
+import com.example.guans.arrivied.fragment.StationItemFragment;
 import com.example.guans.arrivied.util.LOGUtil;
 
-public class SearchActivity extends AppCompatActivity implements BusSearchFragment.OnFragmentInteractionListener,StationChosenFragment.OnFragmentInteractionListener{
+public class SearchActivity extends AppCompatActivity implements BusSearchFragment.OnFragmentInteractionListener,StationChosenFragment.OnFragmentInteractionListener,StationItemFragment.OnFragmentInteractionListener,MapFragment.OnFragmentInteractionListener{
     private BusSearchFragment busSearchFragment;
     private StationChosenFragment stationChosenFragment;
     private FragmentManager fragmentManager;

@@ -24,6 +24,8 @@ import com.example.guans.arrivied.service.GeoFenceService;
 import com.example.guans.arrivied.service.LocateService;
 import com.example.guans.arrivied.receiver.ControllerReceiver;
 
+import static com.example.guans.arrivied.view.MapActivity.SHOW_STATION_ITEM_ACTION;
+
 
 public class MainActivity extends AppCompatActivity implements ControllerReceiver.ControlReceiveListener {
     private ControllerReceiver receiver;
@@ -71,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
            @Override
            public void onClick(View view) {
                Intent mapIntent=new Intent(MainActivity.this,MapActivity.class);
+               mapIntent.setAction(SHOW_STATION_ITEM_ACTION);
                mapIntent.putExtra("StationItem",targetStationItem);
                startActivity(mapIntent);
            }
