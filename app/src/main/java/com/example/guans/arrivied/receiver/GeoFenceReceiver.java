@@ -35,6 +35,7 @@ public class GeoFenceReceiver extends BroadcastReceiver {
         String fenceId = bundle.getString(GeoFence.BUNDLE_KEY_FENCEID);
 //获取当前有触发的围栏对象：
         GeoFence fence = bundle.getParcelable(GeoFence.BUNDLE_KEY_FENCE);
+
 //        Toast.makeText(context,String.valueOf(status)+"/"+customId+"/"+fenceId+"/"+fence.getPoiItem().getAddress(),Toast.LENGTH_LONG).show();
         switch (status){
             case  GEOFENCE_IN:
@@ -44,7 +45,6 @@ public class GeoFenceReceiver extends BroadcastReceiver {
             case GEOFENCE_OUT:
                 LOGUtil.logE(context,"GEOFENCE_OUT"+context.toString());
                 Toast.makeText(context,"GEOFENCE_OUT",Toast.LENGTH_LONG).show();
-                notifyArrived(context,intent);
                 break;
             case GEOFENCE_STAYED:
                 Toast.makeText(context,"GEOFENCE_STAYEC",Toast.LENGTH_LONG).show();
@@ -59,13 +59,11 @@ public class GeoFenceReceiver extends BroadcastReceiver {
         Notification notification = new Notification.Builder(context.getApplicationContext())
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(context.getPackageName())
-                .setContentText("GEOFENCE_IN")
+                .setContentText("您已经到达")
                 .setWhen(System.currentTimeMillis())
                 .setContentIntent(pendingIntent)
                 .build();
         NotificationManager notificationManager= (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(100,notification);
-
-
     }
 }

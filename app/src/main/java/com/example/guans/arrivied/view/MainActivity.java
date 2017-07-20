@@ -118,8 +118,9 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
                 watchIntent.setAction("com.example.guans.arrivied.service.GeoFenceService.ADD_GEOFENCE");
                 // dPoint.setLatitude(intent.getDoubleExtra("Latitude", 0));
 //                dPoint.setLongitude(intent.getDoubleExtra("Longitude", 0));
-                watchIntent.putExtra("Latitude",targetStationItem.getLatLonPoint().getLatitude());
-                watchIntent.putExtra("Longitude",targetStationItem.getLatLonPoint().getLongitude());
+//                watchIntent.putExtra("Latitude",targetStationItem.getLatLonPoint().getLatitude());
+//                watchIntent.putExtra("Longitude",targetStationItem.getLatLonPoint().getLongitude());
+                watchIntent.putExtra("LINE_ITEM",targetStationItem);
                 startService(watchIntent);
             }
         });

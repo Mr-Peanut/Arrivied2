@@ -16,6 +16,7 @@ import com.amap.api.fence.GeoFence;
 import com.amap.api.fence.GeoFenceClient;
 import com.amap.api.fence.GeoFenceListener;
 import com.amap.api.location.DPoint;
+import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.bean.GeoFenceClientProxy;
 import com.example.guans.arrivied.util.LOGUtil;
@@ -37,6 +38,7 @@ public class GeoFenceService extends Service implements GeoFenceListener,GeoFenc
     public static final int ADD_GEOFENCE_ID=100;
     public static final String ADD_GEOFENCE_SUCCESS_ACTION="com.example.guan.arrived.geofenceservice.ADD_GEOFENCE_SUCCESS";
     private GeoFenceClient mGeoFenceClient;
+    private BusStationItem stationItem;
     private GeoFenceClientProxy mGeoFenceClientProxy;
     public GeoFenceService() {
     }
@@ -57,18 +59,19 @@ public class GeoFenceService extends Service implements GeoFenceListener,GeoFenc
             //先实现单点提醒，后续可以实现多点提醒
         mGeoFenceClient.removeGeoFence();
         DPoint dPoint = new DPoint();
-        dPoint.setLatitude(intent.getDoubleExtra("Latitude", 0));
-        dPoint.setLongitude(intent.getDoubleExtra("Longitude", 0));
-        mGeoFenceClient.addGeoFence(dPoint, 10f, "BUS_STATION");
+        stationItem=intent.getParcelableExtra("LINE_ITEM");
+        dPoint.setLatitude(stationItem.getLatLonPoint().getLatitude());
+        dPoint.setLongitude(stationItem.getLatLonPoint().getLongitude());
+        mGeoFenceClient.addGeoFence(dPoint, 50f, "BUS_STATION");
         LOGUtil.logE(this,String.valueOf(dPoint.getLatitude())+"/"+String.valueOf(dPoint.getLongitude()));
         LOGUtil.logE(this,String.valueOf(mGeoFenceClient.getAllGeoFence().size()));
-        Intent startLauchActivity=new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent=PendingIntent.getActivity(this,100,startLauchActivity,PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent startLaunchActivity=new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent=PendingIntent.getActivity(this,100,startLaunchActivity,PendingIntent.FLAG_UPDATE_CURRENT);
         Notification notification= null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
             notification = new Notification.Builder(getApplicationContext())
                     .setContentTitle(getPackageName())
-                    .setContentText("正在监控电子围栏")
+                    .setContentText("正在监控"+stationItem.getBusStationName())
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setWhen(System.currentTimeMillis())
                     .setContentIntent(pendingIntent)

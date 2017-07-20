@@ -9,8 +9,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.amap.api.maps2d.AMap;
+import com.amap.api.maps2d.AMapException;
+import com.amap.api.maps2d.CameraUpdate;
+import com.amap.api.maps2d.CameraUpdateFactory;
 import com.amap.api.maps2d.MapView;
+import com.amap.api.maps2d.model.CameraPosition;
 import com.amap.api.maps2d.model.LatLng;
+import com.amap.api.maps2d.model.LatLngBounds;
 import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
 import com.amap.api.maps2d.model.MyLocationStyle;
@@ -49,11 +54,11 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
     private BusLineItem busLineItem;
     private  List<LatLonPoint> lineLatLonPoints;
     private PolylineOptions polyLineOptions;
-    private HashMap<String,BusStationItem> busStationMaps;
     private List<Marker> markers;
 
 
     private OnFragmentInteractionListener mListener;
+    private CameraPosition cameraPosition;
 
     public MapFragment() {
         // Required empty public constructor
@@ -85,7 +90,6 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
         busLineItem=getArguments().getParcelable("LINE_ITEM");
-        busStationMaps=new HashMap<>();
         markers=new ArrayList<>();
     }
 
@@ -97,14 +101,13 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
         mapView.onCreate(savedInstanceState);
         aMap=mapView.getMap();
         aMap.setOnMarkerClickListener(this);
+        cameraPosition=aMap.getCameraPosition();
         initLocationPoint();
         initBusLineOnMap();
         return view;
     }
-
     private void initBusLineOnMap() {
         if(busLineItem!=null){
-            busStationMaps.clear();
             markers.clear();
            lineLatLonPoints= busLineItem.getDirectionsCoordinates();
             polyLineOptions=new PolylineOptions();
@@ -119,12 +122,22 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
                 marker.setTitle(busStationItem.getBusStationName());
                 marker.showInfoWindow();
                 marker.setDraggable(false);
-                busStationMaps.put(marker.getTitle(),busStationItem);
+                marker.setObject(busStationItem);
                 markers.add(marker);
+            }
+           List<LatLonPoint> latLngBounds=busLineItem.getBounds();
+            LatLonPoint leftUp=latLngBounds.get(0);
+            LatLonPoint rightDown=latLngBounds.get(1);
+            LatLng center=new LatLng((leftUp.getLongitude()+rightDown.getLongitude())/2,(leftUp.getLatitude()+rightDown.getLatitude())/2);
+            try {
+                LatLngBounds latLngBounds1=new LatLngBounds(new LatLng(leftUp.getLatitude(),leftUp.getLongitude()),new LatLng(rightDown.getLatitude(),rightDown.getLongitude()));
+                CameraUpdate cameraUpdate=CameraUpdateFactory.newLatLngBounds(latLngBounds1,50);
+                aMap.moveCamera(cameraUpdate);
+            } catch (AMapException e) {
+                e.printStackTrace();
             }
         }
     }
-
     private void initLocationPoint() {
         myLocationStyle = new MyLocationStyle();//初始化定位蓝点样式类myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);//连续定位、且将视角移动到地图中心点，定位点依照设备方向旋转，并且会跟随设备移动。（1秒1次定位）如果不设置myLocationType，默认也会执行此种模式。
         myLocationStyle.interval(5000); //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
@@ -201,6 +214,7 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
                 marker.destroy();
             }
         }
+        aMap.setMyLocationEnabled(false);
         mapView.onDestroy();
         super.onDestroy();
     }
@@ -213,8 +227,7 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        mListener.onStationItemClick(busStationMaps.get(marker.getTitle()));
-
+        mListener.onStationItemClick((BusStationItem) marker.getObject());
         return true;
     }
 
