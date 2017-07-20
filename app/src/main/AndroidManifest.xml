@@ -46,6 +46,15 @@
         </activity>
 
         <service android:name="com.amap.api.location.APSService" />
+        <activity
+            android:name=".process.LiveActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:finishOnTaskLaunch="false"
+            android:theme="@style/LiveActivityStyle"
+
+            />
         <service
             android:name=".service.LocateService"
             android:enabled="true"

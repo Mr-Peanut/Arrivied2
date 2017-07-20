@@ -19,6 +19,8 @@ import com.amap.api.location.DPoint;
 import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.bean.GeoFenceClientProxy;
+import com.example.guans.arrivied.process.LiveActivity;
+import com.example.guans.arrivied.process.ScreenChangeReceiver;
 import com.example.guans.arrivied.util.LOGUtil;
 import com.example.guans.arrivied.view.MainActivity;
 
@@ -28,7 +30,7 @@ import static com.amap.api.fence.GeoFenceClient.GEOFENCE_IN;
 import static com.amap.api.fence.GeoFenceClient.GEOFENCE_OUT;
 import static com.amap.api.fence.GeoFenceClient.GEOFENCE_STAYED;
 
-public class GeoFenceService extends Service implements GeoFenceListener,GeoFenceClientProxy.GenFenceTaskObserver {
+public class GeoFenceService extends Service implements GeoFenceListener,GeoFenceClientProxy.GenFenceTaskObserver,ScreenChangeReceiver.OnBroadcastReceiveListener {
     public static final int ADD_DPOINT = 1;
     //定义接收广播的action字符串
     public static final String GEOFENCE_BROADCAST_ACTION = "com.location.apis.geofencedemo.broadcast";
@@ -40,6 +42,8 @@ public class GeoFenceService extends Service implements GeoFenceListener,GeoFenc
     private GeoFenceClient mGeoFenceClient;
     private BusStationItem stationItem;
     private GeoFenceClientProxy mGeoFenceClientProxy;
+    private boolean isWatching=false;
+    private ScreenChangeReceiver screenChangeReceiver;
     public GeoFenceService() {
     }
     @Override
@@ -52,6 +56,7 @@ public class GeoFenceService extends Service implements GeoFenceListener,GeoFenc
             mGeoFenceClient.createPendingIntent(GEOFENCE_BROADCAST_ACTION);
             mGeoFenceClient.setGeoFenceListener(this);
         }
+        screenChangeReceiver=new ScreenChangeReceiver(this);
     }
 
     @Override
@@ -94,6 +99,9 @@ public class GeoFenceService extends Service implements GeoFenceListener,GeoFenc
     public void onDestroy() {
         if (!mGeoFenceClient.getAllGeoFence().isEmpty())
             mGeoFenceClient.removeGeoFence();
+        if(screenChangeReceiver!=null){
+            unregisterReceiver(screenChangeReceiver);
+        }
         super.onDestroy();
     }
 
@@ -107,6 +115,7 @@ public class GeoFenceService extends Service implements GeoFenceListener,GeoFenc
             //geoFenceList就是已经添加的围栏列表，可据此查看创建的围栏
             Intent intent=new Intent(ADD_GEOFENCE_SUCCESS_ACTION);
             sendBroadcast(intent);
+            isWatching=true;
         } else {
             Toast.makeText(getApplicationContext(),"围栏创建失败"+s,Toast.LENGTH_SHORT).show();
             //geoFenceList就是已经添加的围栏列表
@@ -123,6 +132,22 @@ public class GeoFenceService extends Service implements GeoFenceListener,GeoFenc
     public void onGeoPointRemoved() {
         stopForeground(true);
         Intent removeGeoFenceIntent=new Intent(ACTION_GEOFENCE_REMOVED);
+        isWatching=false;
         sendBroadcast(removeGeoFenceIntent);
+    }
+
+    @Override
+    public void onBroadcastReceive(Context context, Intent intent) {
+        LOGUtil.logE(this,intent.getAction());
+        if(isWatching){
+            switch (intent.getAction()){
+                case Intent.ACTION_SCREEN_OFF:
+                    Intent startAliveAction=new Intent(this, LiveActivity.class);
+                    startActivity(startAliveAction);
+                    break;
+                case Intent.ACTION_SCREEN_ON:
+                    break;
+            }
+        }
     }
 }
