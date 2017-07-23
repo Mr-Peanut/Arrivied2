@@ -81,6 +81,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="打开地图"/>
+            <Button
+                android:text="测试离线定位"
+                android:id="@+id/testOfflineLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
     </ScrollView>

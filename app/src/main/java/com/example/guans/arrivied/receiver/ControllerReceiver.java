@@ -1,5 +1,6 @@
 package com.example.guans.arrivied.receiver;
 
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,13 @@ import android.content.Intent;
 
 public class ControllerReceiver extends BroadcastReceiver {
     private ControlReceiveListener mListener;
+    private ControllerReceiver(){}
+    public ControllerReceiver(Context context){
+        if(!(context instanceof ControlReceiveListener)){
+            throw new IllegalArgumentException("service must implement ControlReceiveListener ");
+        }
+        mListener= (ControlReceiveListener) context;
+    }
 
     public void setControlListener(ControlReceiveListener mListener) {
         this.mListener = mListener;
@@ -18,10 +26,10 @@ public class ControllerReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if(mListener!=null){
-            mListener.onBroadcastReceive(intent);
+            mListener.onControllBroadcastReceive(intent);
         }
     }
     public interface ControlReceiveListener {
-        void onBroadcastReceive(Intent intent);
+        void onControllBroadcastReceive(Intent intent);
     }
 }

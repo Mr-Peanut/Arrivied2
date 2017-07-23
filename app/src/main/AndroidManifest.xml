@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.guans.arrivied">
+    <uses-permission android:name="android.permission.LOCATION_HARDWARE"/>
 
     <!-- 用于进行网络定位 -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -20,6 +21,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <!-- 用于申请调用A-GPS模块 -->
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name=".application.ArrivedApplication"
@@ -35,8 +38,8 @@
 
         <activity
             android:name=".view.MainActivity"
-            android:screenOrientation="portrait"
             android:launchMode="singleTask"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -46,15 +49,15 @@
         </activity>
 
         <service android:name="com.amap.api.location.APSService" />
+
         <activity
             android:name=".process.LiveActivity"
             android:excludeFromRecents="true"
             android:exported="false"
-            android:launchMode="singleInstance"
             android:finishOnTaskLaunch="false"
-            android:theme="@style/LiveActivityStyle"
+            android:launchMode="singleInstance"
+            android:theme="@style/LiveActivityStyle" />
 
-            />
         <service
             android:name=".service.LocateService"
             android:enabled="true"
@@ -65,33 +68,37 @@
         </service>
         <service
             android:name=".service.GeoFenceService"
-            android:stopWithTask="false"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false"
+            android:stopWithTask="false">
             <intent-filter>
                 <action android:name="com.example.guans.arrivied.service.GeoFenceService.ADD_GEOFENCE" />
-                <action android:name="com.example.guan.arrived.geofenceservice.SERVICE_BIND"/>
+                <action android:name="com.example.guan.arrived.geofenceservice.SERVICE_BIND" />
             </intent-filter>
         </service>
 
         <activity
             android:name=".view.MapActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".view.SearchActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-
-        </activity>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <receiver
             android:name=".receiver.GeoFenceReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.location.apis.geofencedemo.broadcast"/>
+                <action android:name="com.location.apis.geofencedemo.broadcast" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".service.OfflineLocationService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
+
 </manifest>

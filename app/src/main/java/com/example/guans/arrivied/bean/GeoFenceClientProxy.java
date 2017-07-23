@@ -5,6 +5,7 @@ import android.os.Binder;
 import com.amap.api.fence.GeoFence;
 import com.amap.api.fence.GeoFenceClient;
 import com.amap.api.location.DPoint;
+import com.amap.api.services.busline.BusStationItem;
 
 import java.util.List;
 
@@ -15,6 +16,16 @@ import java.util.List;
 public class GeoFenceClientProxy extends Binder {
     private GeoFenceClient mGeoFenceClient;
     private GenFenceTaskObserver genFenceTaskObserver;
+
+    public BusStationItem getBusStationItem() {
+        return busStationItem;
+    }
+
+    public void setBusStationItem(BusStationItem busStationItem) {
+        this.busStationItem = busStationItem;
+    }
+
+    private BusStationItem busStationItem;
 
     public void setGenFenceTaskObserver(GenFenceTaskObserver genFenceTaskObserver) {
         this.genFenceTaskObserver = genFenceTaskObserver;

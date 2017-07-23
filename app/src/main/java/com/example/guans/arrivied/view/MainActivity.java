@@ -23,6 +23,8 @@ import com.example.guans.arrivied.bean.LocationClient;
 import com.example.guans.arrivied.service.GeoFenceService;
 import com.example.guans.arrivied.service.LocateService;
 import com.example.guans.arrivied.receiver.ControllerReceiver;
+import com.example.guans.arrivied.service.OfflineLocationService;
+import com.example.guans.arrivied.util.LOGUtil;
 
 import static com.example.guans.arrivied.view.MapActivity.SHOW_STATION_ITEM_ACTION;
 
@@ -84,6 +86,13 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         onWatching = (TextView) findViewById(R.id.onWatch);
         locationCity= (TextView) findViewById(R.id.locationCity);
         cancel_watch= (Button) findViewById(R.id.cancel_watch);
+        findViewById(R.id.testOfflineLocation).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent=new Intent(MainActivity.this, OfflineLocationService.class);
+                startService(intent);
+            }
+        });
 
         cancel_watch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -135,21 +144,21 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
 
     private void initReceiver() {
         if (receiver==null)
-            receiver=new ControllerReceiver();
-        receiver.setControlListener(this);
+            receiver=new ControllerReceiver(this);
         IntentFilter intentFilter = new IntentFilter(LocateService.ACTION_LOCATION_RESULT);
         intentFilter.addAction(GeoFenceService.ADD_GEOFENCE_SUCCESS_ACTION);
         intentFilter.addAction(GeoFenceService.ACTION_GEOFENCE_REMOVED);
         registerReceiver(receiver,intentFilter);
     }
     @Override
-    public void onBroadcastReceive(Intent intent) {
+    public void onControllBroadcastReceive(Intent intent) {
         switch (intent.getAction()){
             case LocateService.ACTION_LOCATION_RESULT:
                 mHandler.removeCallbacks(locationNoResultRunnable);
                 AMapLocation result=intent.getParcelableExtra("LocationResult");
                 city=result.getCity();
                 locationCity.setText(result.getCity());
+                LOGUtil.logE(this,String.valueOf(result.getLatitude())+"/"+String.valueOf(result.getLongitude()));
                 break;
             case GeoFenceService.ADD_GEOFENCE_SUCCESS_ACTION:
 //                onWatching.setText("正在监控"+geoFenceClientProxy.getGeoFences().get(0).getPoiItem().toString());
@@ -218,6 +227,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
             geoFenceClientProxy= (GeoFenceClientProxy) iBinder;
             if(geoFenceClientProxy!=null&&geoFenceClientProxy.getGeoFences()!=null&&geoFenceClientProxy.getGeoFences().size()!=0){
                 onWatching.setText("正在监控");
+                targetStationItem=geoFenceClientProxy.getBusStationItem();
             }
         }
         @Override

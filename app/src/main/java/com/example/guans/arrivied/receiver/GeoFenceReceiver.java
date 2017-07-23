@@ -8,11 +8,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.annotation.RequiresApi;
 import android.widget.Toast;
 
 import com.amap.api.fence.GeoFence;
 import com.example.guans.arrivied.R;
+import com.example.guans.arrivied.service.GeoFenceService;
 import com.example.guans.arrivied.util.LOGUtil;
 import com.example.guans.arrivied.view.MainActivity;
 
@@ -47,22 +49,25 @@ public class GeoFenceReceiver extends BroadcastReceiver {
                 Toast.makeText(context,"GEOFENCE_OUT",Toast.LENGTH_LONG).show();
                 break;
             case GEOFENCE_STAYED:
-                Toast.makeText(context,"GEOFENCE_STAYEC",Toast.LENGTH_LONG).show();
+//                Toast.makeText(context,"GEOFENCE_STAYEC",Toast.LENGTH_LONG).show();
                 break;
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     private void notifyArrived(Context context, Intent intent) {
-        Intent intent2=new Intent(context,MainActivity.class);
-        PendingIntent pendingIntent=PendingIntent.getActivity(context,0,intent2,PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent2=new Intent(GeoFenceService.ARRIVED_ACTION);
+//        PendingIntent pendingIntent=PendingIntent.getActivity(context,0,intent2,PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent arrivedPendingIntent=PendingIntent.getBroadcast(context,99,intent,PendingIntent.FLAG_UPDATE_CURRENT);
         Notification notification = new Notification.Builder(context.getApplicationContext())
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(context.getPackageName())
                 .setContentText("您已经到达")
                 .setWhen(System.currentTimeMillis())
-                .setContentIntent(pendingIntent)
+                .setContentIntent(arrivedPendingIntent)
+                .setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
                 .build();
+        notification.vibrate=new long[]{0,200,1000,200,1000,200,1000};
         NotificationManager notificationManager= (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(100,notification);
     }
