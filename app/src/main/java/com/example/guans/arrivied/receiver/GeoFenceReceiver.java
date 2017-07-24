@@ -46,7 +46,7 @@ public class GeoFenceReceiver extends BroadcastReceiver {
                 break;
             case GEOFENCE_OUT:
                 LOGUtil.logE(context,"GEOFENCE_OUT"+context.toString());
-                Toast.makeText(context,"GEOFENCE_OUT",Toast.LENGTH_LONG).show();
+//                Toast.makeText(context,"GEOFENCE_OUT",Toast.LENGTH_LONG).show();
                 break;
             case GEOFENCE_STAYED:
 //                Toast.makeText(context,"GEOFENCE_STAYEC",Toast.LENGTH_LONG).show();
