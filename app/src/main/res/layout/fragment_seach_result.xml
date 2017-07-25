@@ -1,0 +1,39 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context="com.example.guans.arrivied.fragment.SearchResultFragment">
+    <TextView
+        android:id="@+id/show_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/target_info"/>
+    <TextView
+        android:id="@+id/target_station_name"
+        android:layout_below="@+id/show_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="30sp"
+        tools:text="新华站"/>
+    <TextView
+        android:id="@+id/target_line_name"
+        android:layout_below="@+id/target_station_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        tools:text="新华线"/>
+    <Button
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_centerVertical="true"
+        android:id="@+id/start_watch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/start_watch"
+        android:layout_marginRight="20dp"
+        android:layout_alignParentRight="true"
+        tools:ignore="RelativeOverlap" />
+
+
+</RelativeLayout>

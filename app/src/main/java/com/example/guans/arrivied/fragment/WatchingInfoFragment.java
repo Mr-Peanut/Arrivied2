@@ -8,10 +8,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.amap.api.services.busline.BusLineItem;
 import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
+import com.example.guans.arrivied.bean.WatchItem;
 import com.example.guans.arrivied.util.LOGUtil;
 
 /**
@@ -34,6 +37,9 @@ public class WatchingInfoFragment extends Fragment {
     private Button cancelWatchButton;
     private TextView showStatueTextView;
     private BusStationItem busStationItem;
+    private BusLineItem busLineItem;
+    private ImageButton showMapButton;
+    private WatchItem onWatchItem;
 
     private OnFragmentInteractionListener mListener;
 
@@ -65,7 +71,9 @@ public class WatchingInfoFragment extends Fragment {
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
-            busStationItem=getArguments().getParcelable("STATION_ITEM");
+//            busStationItem=getArguments().getParcelable("STATION_ITEM");
+//            busStationItem=getArguments().getParcelable("LINE_ITEM");
+            onWatchItem=getArguments().getParcelable("ON_WATCH_ITEM");
         }
     }
 
@@ -75,7 +83,7 @@ public class WatchingInfoFragment extends Fragment {
         View contentView=inflater.inflate(R.layout.fragment_watching_info, container, false);
         cancelWatchButton=contentView.findViewById(R.id.cancel_watch);
         showStatueTextView=contentView.findViewById(R.id.station_info);
-        showStatueTextView.setText("正在监控"+busStationItem.getBusStationName());
+        showStatueTextView.setText("正在监控"+onWatchItem.getBusStationItem().getBusStationName()+"/n"+onWatchItem.getBusLineItem().getBusLineName());
         cancelWatchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -103,8 +111,10 @@ public class WatchingInfoFragment extends Fragment {
         }
     }
     public void flush(){
-        busStationItem=getArguments().getParcelable("STATION_ITEM");
-        showStatueTextView.setText("正在监控"+busStationItem.getBusStationName());
+        onWatchItem=getArguments().getParcelable("ON_WATCH_ITEM");
+//        showStatueTextView.setText("正在监控"+busStationItem.getBusStationName());
+        showStatueTextView.setText("正在监控"+onWatchItem.getBusStationItem().getBusStationName()+"/n"+onWatchItem.getBusLineItem().getBusLineName());
+
     }
 
     @Override

@@ -218,6 +218,9 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
         mapView.onDestroy();
         super.onDestroy();
     }
+    public void flush(){
+        initBusLineOnMap();
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {

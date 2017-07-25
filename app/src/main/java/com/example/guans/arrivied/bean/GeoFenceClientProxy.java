@@ -17,6 +17,16 @@ public class GeoFenceClientProxy extends Binder {
     private GeoFenceClient mGeoFenceClient;
     private GenFenceTaskObserver genFenceTaskObserver;
 
+    public WatchItem getWatchItem() {
+        return watchItem;
+    }
+
+    public void setWatchItem(WatchItem watchItem) {
+        this.watchItem = watchItem;
+    }
+
+    private WatchItem watchItem;
+
     public BusStationItem getBusStationItem() {
         return busStationItem;
     }

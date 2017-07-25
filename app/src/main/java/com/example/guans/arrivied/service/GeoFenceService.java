@@ -21,6 +21,7 @@ import com.amap.api.location.DPoint;
 import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.bean.GeoFenceClientProxy;
+import com.example.guans.arrivied.bean.WatchItem;
 import com.example.guans.arrivied.process.LiveActivity;
 import com.example.guans.arrivied.process.ScreenChangeReceiver;
 import com.example.guans.arrivied.receiver.ControllerReceiver;
@@ -47,14 +48,15 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     private GeoFenceClient mGeoFenceClient;
     private BusStationItem stationItem;
     private GeoFenceClientProxy mGeoFenceClientProxy;
+    private PowerManager.WakeLock wakeLock;
     private boolean isWatching=false;
     private ScreenChangeReceiver screenChangeReceiver;
     private ControllerReceiver controller;
     private AlarmManager alarmManager;
     private PendingIntent wakeupPendingIntent;
     private PowerManager pm;
-    private PowerManager.WakeLock wakeLock;
     private Handler handler;
+    private WatchItem watchItem;
     private Runnable tryAddDeoFenceAgainRunnable =new Runnable() {
         @Override
         public void run() {
@@ -123,7 +125,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             remoteViews.setTextViewText(R.id.station_info,"您设置了"+stationItem.getBusStationName());
             Notification.Builder builder=new Notification.Builder(getApplicationContext())
                     .setContentTitle(getPackageName())
-                    .setContentText("正在监控"+stationItem.getBusStationName())
+                    .setContentText("正在监控"+stationItem.getBusStationName()+"/n"+watchItem.getBusLineItem().getBusLineName())
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setWhen(System.currentTimeMillis())
                     .setContentIntent(pendingIntent);
@@ -142,8 +144,10 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     }
 
     private void addGeoFence(Intent intent) {
-        stationItem=intent.getParcelableExtra("STATION_ITEM");
+        watchItem=intent.getParcelableExtra("TARGET_ITEM");
+        stationItem=watchItem.getBusStationItem();
         mGeoFenceClientProxy.setBusStationItem(stationItem);
+        mGeoFenceClientProxy.setWatchItem(watchItem);
         addGeoFence(stationItem);
         handler.postDelayed(tryAddDeoFenceAgainRunnable,2000);
     }
@@ -187,7 +191,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             //geoFenceList就是已经添加的围栏列表，可据此查看创建的围栏
             //发送一个添加围栏成功的broadcast，更新ui
             Intent intent=new Intent(ADD_GEOFENCE_SUCCESS_ACTION);
-            intent.putExtra("ON_WATCH_STATION",stationItem);
+//            intent.putExtra("ON_WATCH_STATION",stationItem);
+            intent.putExtra("ON_WATCH_ITEM",watchItem);
             sendBroadcast(intent);
             isWatching=true;
         } else {
@@ -233,6 +238,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
        switch (intent.getAction()){
            case GEOFENCE_CANCLE_ATCITON:
               mGeoFenceClientProxy.removeDPoint();
+               if(wakeLock.isHeld())
                wakeLock.release();
                break;
            case "wakeup":

@@ -51,36 +51,16 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             tools:context="com.example.guans.arrivied.view.MainActivity">
-            <TextView
-                android:id="@+id/onWatch"
-                android:layout_width="191dp"
-                android:layout_height="75dp"
-                android:gravity="center"
-                android:text="@string/city" />
-            <TextView
-                android:id="@+id/station_result"
-                android:layout_width="201dp"
-                android:layout_height="48dp"
-                android:text="@string/target_station"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent" />
-            <Button
-                android:id="@+id/start_watch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="false"
-                android:text="@string/start_watch"
-                />
-            <Button
-                android:id="@+id/openMap"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="打开地图"/>
-            <Button
-                android:text="测试离线定位"
-                android:id="@+id/testOfflineLocation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+            <!--<Button-->
+                <!--android:id="@+id/openMap"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="打开地图"/>-->
+            <!--<Button-->
+                <!--android:text="测试离线定位"-->
+                <!--android:id="@+id/testOfflineLocation"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content" />-->
 
         </LinearLayout>
     </ScrollView>

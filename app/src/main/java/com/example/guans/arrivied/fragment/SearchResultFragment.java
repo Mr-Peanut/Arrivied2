@@ -4,42 +4,44 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.amap.api.services.busline.BusLineItem;
 import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
-import com.example.guans.arrivied.adapter.LineAdapter;
-import com.example.guans.arrivied.util.LOGUtil;
+import com.example.guans.arrivied.bean.WatchItem;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link StationItemFragment.OnFragmentInteractionListener} interface
+ * {@link SearchResultFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link StationItemFragment#newInstance} factory method to
+ * Use the {@link SearchResultFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class StationItemFragment extends Fragment implements LineAdapter.OnStationItemClickListener {
+public class SearchResultFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private BusLineItem busLineItem;
-    private RecyclerView stationList;
-    private LineAdapter lineAdapter;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private BusStationItem targetStation;
+    private BusLineItem targetLine;
+    private TextView targetStationName;
+    private TextView targetLineName;
+    private Button startWatch;
+    private WatchItem targetItem;
 
     private OnFragmentInteractionListener mListener;
 
-    public StationItemFragment() {
+    public SearchResultFragment() {
         // Required empty public constructor
     }
 
@@ -49,11 +51,11 @@ public class StationItemFragment extends Fragment implements LineAdapter.OnStati
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment StationItemFragment.
+     * @return A new instance of fragment SearchResultFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static StationItemFragment newInstance(String param1, String param2) {
-        StationItemFragment fragment = new StationItemFragment();
+    public static SearchResultFragment newInstance(String param1, String param2) {
+        SearchResultFragment fragment = new SearchResultFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -68,21 +70,28 @@ public class StationItemFragment extends Fragment implements LineAdapter.OnStati
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        LOGUtil.logE(this,"onCreate");
-        busLineItem=getArguments().getParcelable("LINE_ITEM");
-        LOGUtil.logE(this,"busLineItem"+busLineItem.getBusLineName());
-        lineAdapter=new LineAdapter(getActivity(),busLineItem);
-        lineAdapter.setStationItemClickListener(this);
+//        targetStation=getArguments().getParcelable("STATION_ITEM");
+//        targetLine=getArguments().getParcelable("LINE_ITEM");
+        targetItem=getArguments().getParcelable("WATCH_ITEM");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view=inflater.inflate(R.layout.fragment_station_item, container, false);
-        stationList=view.findViewById(R.id.stationList);
-        stationList.setLayoutManager(new LinearLayoutManager(getContext()));
-        stationList.setAdapter(lineAdapter);
-        return view;
+        // Inflate the layout for this fragment
+        View contentView=inflater.inflate(R.layout.fragment_seach_result, container, false);
+        targetLineName=contentView.findViewById(R.id.target_line_name);
+        targetStationName=contentView.findViewById(R.id.target_station_name);
+        targetStationName.setText(targetItem.getBusStationItem().getBusStationName());
+        targetLineName.setText(targetItem.getBusLineItem().getBusLineName());
+        startWatch=contentView.findViewById(R.id.start_watch);
+        startWatch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mListener.OnStartWatchClicked(targetItem);
+            }
+        });
+        return contentView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -102,19 +111,18 @@ public class StationItemFragment extends Fragment implements LineAdapter.OnStati
                     + " must implement OnFragmentInteractionListener");
         }
     }
+  public  void flush(){
+//        targetStation=getArguments().getParcelable("STATION_ITEM");
+//        targetLine=getArguments().getParcelable("LINE_ITEM");
+      targetItem=getArguments().getParcelable("WATCH_ITEM");
+      targetStationName.setText(targetItem.getBusStationItem().getBusStationName());
+      targetLineName.setText(targetItem.getBusLineItem().getBusLineName());
+    }
 
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-    public void flush(){
-        lineAdapter.setBusLineItem(busLineItem);
-    }
-
-    @Override
-    public void onStationItemClick(BusStationItem busStationItem) {
-        mListener.onStationItemClick(busStationItem);
     }
 
     /**
@@ -130,6 +138,7 @@ public class StationItemFragment extends Fragment implements LineAdapter.OnStati
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
-        void onStationItemClick(BusStationItem busStationItem);
+
+        void OnStartWatchClicked(WatchItem targetStation);
     }
 }

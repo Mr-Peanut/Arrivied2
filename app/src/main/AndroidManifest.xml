@@ -27,11 +27,11 @@
     <application
         android:name=".application.ArrivedApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/bus_station"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <!--android:roundIcon="@mipmap/ic_launcher_round"-->
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="571282966fe766c83a8438c95beeb7d2" />

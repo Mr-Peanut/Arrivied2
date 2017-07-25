@@ -113,6 +113,12 @@ public class StationChosenFragment extends Fragment implements LineAdapter.OnSta
 //        lineAdapter.setBusLineItem(busLineItem=getActivity().getIntent().getParcelableExtra("BUS_LINE_ITEM"));
         //刷新对应fragment的数据
         tittle.setText(busLineItem.getBusLineName());
+        if(stationItemFragment!=null){
+            stationItemFragment.flush();
+        }
+        if(mapFragment!=null){
+            mapFragment.flush();
+        }
     }
 
     private void initView(View view, final Bundle savedInstanceStat) {

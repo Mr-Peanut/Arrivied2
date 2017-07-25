@@ -10,6 +10,7 @@ import android.widget.FrameLayout;
 import com.amap.api.services.busline.BusLineItem;
 import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
+import com.example.guans.arrivied.bean.WatchItem;
 import com.example.guans.arrivied.fragment.BusSearchFragment;
 import com.example.guans.arrivied.fragment.MapFragment;
 import com.example.guans.arrivied.fragment.StationChosenFragment;
@@ -20,6 +21,7 @@ public class SearchActivity extends AppCompatActivity implements BusSearchFragme
     private BusSearchFragment busSearchFragment;
     private StationChosenFragment stationChosenFragment;
     private FragmentManager fragmentManager;
+    private BusLineItem busLineItem;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,7 +40,9 @@ public class SearchActivity extends AppCompatActivity implements BusSearchFragme
     public void onStationItemClick(BusStationItem busStationItem) {
         Intent intent=new Intent();
         if(busStationItem!=null){
-            intent.putExtra("STATION_ITEM",busStationItem);
+            intent.putExtra("TARGET_ITEM",new WatchItem(busLineItem,busStationItem));
+//            intent.putExtra("STATION_ITEM",busStationItem);
+//            intent.putExtra("LINE_ITEM",busLineItem);
             setResult(RESULT_OK,intent);
         }
         finish();
@@ -47,6 +51,7 @@ public class SearchActivity extends AppCompatActivity implements BusSearchFragme
     @Override
     public void onLineItemClicked(BusLineItem targetLineItem) {
         //打开站点选择fragment
+        busLineItem=targetLineItem;
         getIntent().putExtra("BUS_LINE_ITEM",targetLineItem);
         LOGUtil.logE(this,targetLineItem.getBusLineName());
         if(stationChosenFragment==null) {
