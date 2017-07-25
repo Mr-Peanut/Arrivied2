@@ -120,7 +120,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             RemoteViews remoteViews=new RemoteViews(getPackageName(),R.layout.watching_notification_view);
             Intent cancelIntent=new Intent(GEOFENCE_CANCLE_ATCITON);
             remoteViews.setOnClickPendingIntent(R.id.cancel_watch,PendingIntent.getBroadcast(getApplicationContext(),0,cancelIntent,PendingIntent.FLAG_UPDATE_CURRENT));
-            remoteViews.setTextViewText(R.id.content_title,"您设置了"+stationItem.getBusStationName());
+            remoteViews.setTextViewText(R.id.station_info,"您设置了"+stationItem.getBusStationName());
             Notification.Builder builder=new Notification.Builder(getApplicationContext())
                     .setContentTitle(getPackageName())
                     .setContentText("正在监控"+stationItem.getBusStationName())

@@ -36,7 +36,7 @@
     </android.support.v7.widget.Toolbar>
 
     <FrameLayout
-        android:id="@+id/locationStatue"
+        android:id="@+id/taskStatue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
     </FrameLayout>
@@ -57,11 +57,6 @@
                 android:layout_height="75dp"
                 android:gravity="center"
                 android:text="@string/city" />
-            <Button
-                android:id="@+id/cancel_watch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="取消"/>
             <TextView
                 android:id="@+id/station_result"
                 android:layout_width="201dp"

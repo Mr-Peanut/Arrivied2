@@ -5,8 +5,10 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -15,21 +17,20 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.amap.api.location.AMapLocation;
-import com.amap.api.maps2d.model.Marker;
 import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.bean.GeoFenceClientProxy;
 import com.example.guans.arrivied.bean.LocationClient;
+import com.example.guans.arrivied.fragment.WatchingInfoFragment;
 import com.example.guans.arrivied.service.GeoFenceService;
 import com.example.guans.arrivied.service.LocateService;
 import com.example.guans.arrivied.receiver.ControllerReceiver;
-import com.example.guans.arrivied.service.OfflineLocationService;
 import com.example.guans.arrivied.util.LOGUtil;
 
 import static com.example.guans.arrivied.view.MapActivity.SHOW_STATION_ITEM_ACTION;
 
 
-public class MainActivity extends AppCompatActivity implements ControllerReceiver.ControlReceiveListener {
+public class MainActivity extends AppCompatActivity implements ControllerReceiver.ControlReceiveListener,WatchingInfoFragment.OnFragmentInteractionListener {
     private ControllerReceiver receiver;
     private LocationClient locationClient;
     private ServiceConnection locationServiceConnection;
@@ -43,9 +44,12 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
     private BusStationItem targetStationItem;
     private TextView targetStationText;
     private Button start_watch;
-    private Button cancel_watch;
     private BusStationItem onWatchStation;
+    private FragmentManager fragmentManager;
+    private WatchingInfoFragment watchingInfoFragment;
     public static final int BUS_STATION_SEARCH_RESULT_CODE=1;
+    private static final String WATCH_INFO_FRAGMENT_TAG="WATCH_INFO";
+    private static final String SEARCH_RESULT_TAG="SEARCH_RESULT";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
                 }
               }
             };
+        fragmentManager=getSupportFragmentManager();
         initView();
         initReceiver();
         bindLocationService();
@@ -86,15 +91,6 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         TextView busSearch = (TextView) findViewById(R.id.bus_search);
         onWatching = (TextView) findViewById(R.id.onWatch);
         locationCity= (TextView) findViewById(R.id.locationCity);
-        cancel_watch= (Button) findViewById(R.id.cancel_watch);
-        cancel_watch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(geoFenceClientProxy!=null){
-                    geoFenceClientProxy.removeDPoint();
-                }
-            }
-        });
         locationCity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -134,6 +130,21 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         locationServiceConnection = new LocationServiceConnection();
         bindService(locationIntent, locationServiceConnection, Service.BIND_AUTO_CREATE);
     }
+    private void showWatchInfoFragment(){
+      if(watchingInfoFragment==null){
+          watchingInfoFragment= (WatchingInfoFragment) fragmentManager.findFragmentByTag(WATCH_INFO_FRAGMENT_TAG);
+      }
+      if(watchingInfoFragment==null){
+          watchingInfoFragment=WatchingInfoFragment.newInstance(null,null);
+          fragmentManager.beginTransaction().add(R.id.taskStatue,watchingInfoFragment,WATCH_INFO_FRAGMENT_TAG).commit();
+      }
+         watchingInfoFragment.getArguments().putParcelable("STATION_ITEM",onWatchStation);
+         fragmentManager.beginTransaction().show(watchingInfoFragment).commit();
+         watchingInfoFragment.flush();
+    }
+    private void showSearchResult(){
+
+    }
 
     private void initReceiver() {
         if (receiver==null)
@@ -157,6 +168,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
                 onWatchStation=intent.getParcelableExtra("ON_WATCH_STATION");
 //                onWatching.setText("正在监控"+geoFenceClientProxy.getGeoFences().get(0).getPoiItem().toString());
                 onWatching.setText("正在监控"+onWatchStation.getBusStationName());
+                showWatchInfoFragment();
 //                LOGUtil.logE(this,"proxy is null"+String.valueOf(geoFenceClientProxy==null));
 //                LOGUtil.logE(this,"GeoFences is null"+String.valueOf(geoFenceClientProxy.getGeoFences()==null));
 //                LOGUtil.logE(this,"item is null"+String.valueOf(geoFenceClientProxy.getGeoFences().get(0)==null));
@@ -164,6 +176,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
             case GeoFenceService.ACTION_GEOFENCE_REMOVED:
                 onWatching.setText("没有监控对象");
                 onWatchStation=null;
+                fragmentManager.beginTransaction().hide(watchingInfoFragment).commit();
                 break;
         }
 
@@ -203,6 +216,18 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         }
     }
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
+    @Override
+    public void onCancelWatchingClick(View view) {
+        if(geoFenceClientProxy!=null){
+            geoFenceClientProxy.removeDPoint();
+        }
+    }
+
     private class LocationServiceConnection implements ServiceConnection {
 
         @Override
@@ -221,9 +246,9 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             geoFenceClientProxy= (GeoFenceClientProxy) iBinder;
             if(geoFenceClientProxy!=null&&geoFenceClientProxy.getGeoFences()!=null&&geoFenceClientProxy.getGeoFences().size()!=0){
-
                 onWatchStation=geoFenceClientProxy.getBusStationItem();
                 onWatching.setText("正在监控"+onWatchStation.getBusStationName());
+                showWatchInfoFragment();
             }
         }
         @Override

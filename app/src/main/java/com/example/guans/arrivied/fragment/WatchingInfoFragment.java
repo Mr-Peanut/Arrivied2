@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
+import com.example.guans.arrivied.util.LOGUtil;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -71,10 +72,10 @@ public class WatchingInfoFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View contentView=inflater.inflate(R.layout.fragment_watching_info, container, false);
+        View contentView=inflater.inflate(R.layout.fragment_bus_search, container, false);
         cancelWatchButton=contentView.findViewById(R.id.cancel_watch);
-        showStatueTextView=contentView.findViewById(R.id.content_title);
-        showStatueTextView.setText("正在监控"+busStationItem.getBusStationName());
+        showStatueTextView=contentView.findViewById(R.id.station_info);
+//        showStatueTextView.setText("正在监控"+busStationItem.getBusStationName());
         cancelWatchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -100,6 +101,11 @@ public class WatchingInfoFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
+    }
+    public void flush(){
+        busStationItem=getArguments().getParcelable("STATION_ITEM");
+        LOGUtil.logE(this,busStationItem.getBusStationName());
+        showStatueTextView.setText("正在监控"+busStationItem.getBusStationName());
     }
 
     @Override
