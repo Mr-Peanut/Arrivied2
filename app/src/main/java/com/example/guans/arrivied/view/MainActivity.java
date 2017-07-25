@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
     private TextView targetStationText;
     private Button start_watch;
     private Button cancel_watch;
+    private BusStationItem onWatchStation;
     public static final int BUS_STATION_SEARCH_RESULT_CODE=1;
 
     @Override
@@ -86,14 +87,6 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         onWatching = (TextView) findViewById(R.id.onWatch);
         locationCity= (TextView) findViewById(R.id.locationCity);
         cancel_watch= (Button) findViewById(R.id.cancel_watch);
-        findViewById(R.id.testOfflineLocation).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent=new Intent(MainActivity.this, OfflineLocationService.class);
-                startService(intent);
-            }
-        });
-
         cancel_watch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -129,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
 //                dPoint.setLongitude(intent.getDoubleExtra("Longitude", 0));
 //                watchIntent.putExtra("Latitude",targetStationItem.getLatLonPoint().getLatitude());
 //                watchIntent.putExtra("Longitude",targetStationItem.getLatLonPoint().getLongitude());
-                watchIntent.putExtra("LINE_ITEM",targetStationItem);
+                watchIntent.putExtra("STATION_ITEM",targetStationItem);
                 startService(watchIntent);
             }
         });
@@ -151,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         registerReceiver(receiver,intentFilter);
     }
     @Override
-    public void onControllBroadcastReceive(Intent intent) {
+    public void onControlBroadcastReceive(Intent intent) {
         switch (intent.getAction()){
             case LocateService.ACTION_LOCATION_RESULT:
                 mHandler.removeCallbacks(locationNoResultRunnable);
@@ -161,14 +154,16 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
                 LOGUtil.logE(this,String.valueOf(result.getLatitude())+"/"+String.valueOf(result.getLongitude()));
                 break;
             case GeoFenceService.ADD_GEOFENCE_SUCCESS_ACTION:
+                onWatchStation=intent.getParcelableExtra("ON_WATCH_STATION");
 //                onWatching.setText("正在监控"+geoFenceClientProxy.getGeoFences().get(0).getPoiItem().toString());
-                onWatching.setText("正在监控");
+                onWatching.setText("正在监控"+onWatchStation.getBusStationName());
 //                LOGUtil.logE(this,"proxy is null"+String.valueOf(geoFenceClientProxy==null));
 //                LOGUtil.logE(this,"GeoFences is null"+String.valueOf(geoFenceClientProxy.getGeoFences()==null));
 //                LOGUtil.logE(this,"item is null"+String.valueOf(geoFenceClientProxy.getGeoFences().get(0)==null));
                 break;
             case GeoFenceService.ACTION_GEOFENCE_REMOVED:
                 onWatching.setText("没有监控对象");
+                onWatchStation=null;
                 break;
         }
 
@@ -226,8 +221,9 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             geoFenceClientProxy= (GeoFenceClientProxy) iBinder;
             if(geoFenceClientProxy!=null&&geoFenceClientProxy.getGeoFences()!=null&&geoFenceClientProxy.getGeoFences().size()!=0){
-                onWatching.setText("正在监控");
-                targetStationItem=geoFenceClientProxy.getBusStationItem();
+
+                onWatchStation=geoFenceClientProxy.getBusStationItem();
+                onWatching.setText("正在监控"+onWatchStation.getBusStationName());
             }
         }
         @Override

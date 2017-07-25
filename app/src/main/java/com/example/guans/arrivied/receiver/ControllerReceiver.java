@@ -1,6 +1,5 @@
 package com.example.guans.arrivied.receiver;
 
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,10 +25,10 @@ public class ControllerReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if(mListener!=null){
-            mListener.onControllBroadcastReceive(intent);
+            mListener.onControlBroadcastReceive(intent);
         }
     }
     public interface ControlReceiveListener {
-        void onControllBroadcastReceive(Intent intent);
+        void onControlBroadcastReceive(Intent intent);
     }
 }
