@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
       }
          watchingInfoFragment.getArguments().putParcelable("STATION_ITEM",onWatchStation);
          fragmentManager.beginTransaction().show(watchingInfoFragment).commit();
-         watchingInfoFragment.flush();
+//         watchingInfoFragment.flush();
     }
     private void showSearchResult(){
 

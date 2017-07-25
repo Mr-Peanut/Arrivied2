@@ -72,10 +72,10 @@ public class WatchingInfoFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View contentView=inflater.inflate(R.layout.fragment_bus_search, container, false);
+        View contentView=inflater.inflate(R.layout.fragment_watching_info, container, false);
         cancelWatchButton=contentView.findViewById(R.id.cancel_watch);
         showStatueTextView=contentView.findViewById(R.id.station_info);
-//        showStatueTextView.setText("正在监控"+busStationItem.getBusStationName());
+        showStatueTextView.setText("正在监控"+busStationItem.getBusStationName());
         cancelWatchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -104,7 +104,6 @@ public class WatchingInfoFragment extends Fragment {
     }
     public void flush(){
         busStationItem=getArguments().getParcelable("STATION_ITEM");
-        LOGUtil.logE(this,busStationItem.getBusStationName());
         showStatueTextView.setText("正在监控"+busStationItem.getBusStationName());
     }
 
