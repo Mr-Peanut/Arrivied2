@@ -60,14 +60,16 @@ public class GeoFenceReceiver extends BroadcastReceiver {
 //        PendingIntent pendingIntent=PendingIntent.getActivity(context,0,intent2,PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent arrivedPendingIntent=PendingIntent.getBroadcast(context,99,intent,PendingIntent.FLAG_UPDATE_CURRENT);
         Notification notification = new Notification.Builder(context.getApplicationContext())
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.bus_station)
                 .setContentTitle(context.getPackageName())
                 .setContentText("您已经到达")
                 .setWhen(System.currentTimeMillis())
                 .setContentIntent(arrivedPendingIntent)
+                .setAutoCancel(true)
+                .setPriority(Notification.PRIORITY_MAX)
                 .setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
                 .build();
-        notification.vibrate=new long[]{0,200,1000,200,1000,200,1000};
+        notification.flags=Notification.FLAG_INSISTENT;
         NotificationManager notificationManager= (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(100,notification);
     }
