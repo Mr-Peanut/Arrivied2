@@ -43,6 +43,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     public static final String ACTION_GEOFENCE_SERVICE_BIND = "com.example.guan.arrived.geofenceservice.SERVICE_BIND";
     public static final String ACTION_GEOFENCE_REMOVED = "com.example.guan.arrived.geofenceservice.GEOREMOVED";
     public static final int ADD_GEOFENCE_ID=100;
+    public static final int ARRIVED_NOTIFICATION_ID=101;
     public static final String ADD_GEOFENCE_SUCCESS_ACTION="com.example.guan.arrived.geofenceservice.ADD_GEOFENCE_SUCCESS";
     public static final String ARRIVED_ACTION="com.example.guan.arrived.geofenceservice.ARRIVED";
     public static final String WAKE_UP_ACTION="com.example.guan.arrived.geofenceservice.WAKE_UP";
@@ -53,8 +54,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     private boolean isWatching=false;
     private ScreenChangeReceiver screenChangeReceiver;
     private ControllerReceiver controller;
-    private AlarmManager alarmManager;
-    private PendingIntent wakeupPendingIntent;
+//    private AlarmManager alarmManager;
+//    private PendingIntent wakeupPendingIntent;
     private PowerManager pm;
     private Handler handler;
     private WatchItem watchItem;
@@ -92,8 +93,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         //保持cpu一直运行，不管屏幕是否黑屏
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CPUKeepRunning");
-        alarmManager = (AlarmManager) getSystemService(Service.ALARM_SERVICE);
-        wakeupPendingIntent =PendingIntent.getBroadcast(this,0,new Intent(WAKE_UP_ACTION),PendingIntent.FLAG_UPDATE_CURRENT);
+//        alarmManager = (AlarmManager) getSystemService(Service.ALARM_SERVICE);
+//        wakeupPendingIntent =PendingIntent.getBroadcast(this,0,new Intent(WAKE_UP_ACTION),PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     @Override
@@ -111,7 +112,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
 
     private void startAlarmTask() {
 //        if(isWatching){
-        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,0,10000, wakeupPendingIntent);
+//        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,0,10000, wakeupPendingIntent);
         wakeLock.acquire();
     }
 
@@ -159,7 +160,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         DPoint dPoint = new DPoint();
         dPoint.setLatitude(stationItem.getLatLonPoint().getLatitude());
         dPoint.setLongitude(stationItem.getLatLonPoint().getLongitude());
-        mGeoFenceClient.addGeoFence(dPoint, 80.0f, "BUS_STATION");
+        mGeoFenceClient.addGeoFence(dPoint, 80f, "BUS_STATION");
     }
 
     @Override
@@ -216,7 +217,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         stopForeground(true);
         Intent removeGeoFenceIntent=new Intent(ACTION_GEOFENCE_REMOVED);
         isWatching=false;
-        alarmManager.cancel(wakeupPendingIntent);
+//        alarmManager.cancel(wakeupPendingIntent);
         if(wakeLock.isHeld()){
             LOGUtil.logE(this,"releaseLock");
             wakeLock.release();
@@ -248,6 +249,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
               mGeoFenceClientProxy.removeDPoint();
                if(wakeLock.isHeld())
                wakeLock.release();
+               stopSelf();
                break;
            case WAKE_UP_ACTION:
                LOGUtil.logE(this,"wakeup");
@@ -256,7 +258,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                mGeoFenceClientProxy.removeDPoint();
                if(wakeLock.isHeld())
                wakeLock.release();
-               alarmManager.cancel(wakeupPendingIntent);
+//               alarmManager.cancel(wakeupPendingIntent);
+               LOGUtil.logE(this,"arrived");
                stopSelf();
                break;
        }
