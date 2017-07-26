@@ -196,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
                 break;
             case GeoFenceService.ACTION_GEOFENCE_REMOVED:
                 onWatchStation=null;
+                if(!watchingInfoFragment.isHidden())
                 fragmentManager.beginTransaction().hide(watchingInfoFragment).commit();
                 break;
         }

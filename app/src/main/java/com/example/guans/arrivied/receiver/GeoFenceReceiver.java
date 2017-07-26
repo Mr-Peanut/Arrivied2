@@ -8,8 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.support.annotation.RequiresApi;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.amap.api.fence.GeoFence;
@@ -60,17 +60,31 @@ public class GeoFenceReceiver extends BroadcastReceiver {
         Intent intent2=new Intent(context,MainActivity.class);
         intent2.setFlags(FLAG_ACTIVITY_NEW_TASK);
         PendingIntent arrivedPendingIntent=PendingIntent.getActivity(context,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
-        Notification notification = new Notification.Builder(context.getApplicationContext())
+        RemoteViews headUpView=new RemoteViews("com.example.guans.arrivied",R.layout.arrived_notification_head_up_view);
+        Notification notification=new android.support.v7.app.NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.bus_station)
                 .setContentTitle("Arrived 友情提示")
-                .setContentText("您已经到站，请准备下车,滑动停止提醒")
+                .setContentText("您已经到站，请准备下车,滑动或点击停止提醒")
                 .setWhen(System.currentTimeMillis())
                 .setTicker("您已到站！")
                 .setAutoCancel(true)
+                .setContentIntent(arrivedPendingIntent)
+                .setCustomHeadsUpContentView(headUpView)
+                .setPriority(Notification.PRIORITY_MAX)
+                .setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                .setFullScreenIntent(arrivedPendingIntent,true)
+                .build();
+//        Notification notification = new Notification.Builder(context.getApplicationContext())
+//                .setSmallIcon(R.drawable.bus_station)
+//                .setContentTitle("Arrived 友情提示")
+//                .setContentText("您已经到站，请准备下车,滑动或点击停止提醒")
+//                .setWhen(System.currentTimeMillis())
+//                .setTicker("您已到站！")
+//                .setAutoCancel(true)
 //                .setContentIntent(arrivedPendingIntent)
 //                .setPriority(Notification.PRIORITY_MAX)
-                .setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                .build();
+//                .setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+//                .build();
         notification.flags=Notification.FLAG_INSISTENT|Notification.FLAG_AUTO_CANCEL;
         NotificationManager notificationManager= (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(GeoFenceService.ARRIVED_NOTIFICATION_ID,notification);
