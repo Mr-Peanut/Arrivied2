@@ -219,6 +219,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         if(wakeLock.isHeld())
             wakeLock.release();
         sendBroadcast(removeGeoFenceIntent);
+        stopSelf();
     }
 
     @Override
@@ -251,7 +252,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                mGeoFenceClientProxy.removeDPoint();
                wakeLock.release();
                alarmManager.cancel(wakeupPendingIntent);
-               stopSelf();
+
                break;
        }
     }
