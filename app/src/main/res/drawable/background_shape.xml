@@ -6,10 +6,10 @@
         android:top="5dp"
         android:left="8dp"
         android:right="8dp"/>
-    <solid android:color="#FFF5EE"/>
+    <solid android:color="#FFFFEE"/>
     <gradient
-        android:startColor="#FFF5EE"
-        android:endColor="#FFF5EE"
+        android:startColor="#FFFFEE"
+        android:endColor="#FFFFEE"
         android:type="linear"
        />
 </shape>

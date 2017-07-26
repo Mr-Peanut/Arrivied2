@@ -83,7 +83,7 @@ public class WatchingInfoFragment extends Fragment {
         View contentView=inflater.inflate(R.layout.fragment_watching_info, container, false);
         cancelWatchButton=contentView.findViewById(R.id.cancel_watch);
         showStatueTextView=contentView.findViewById(R.id.station_info);
-        showStatueTextView.setText("正在监控"+onWatchItem.getBusStationItem().getBusStationName()+"/n"+onWatchItem.getBusLineItem().getBusLineName());
+        showStatueTextView.setText("正在监控"+onWatchItem.getBusStationItem().getBusStationName()+"\n"+onWatchItem.getBusLineItem().getBusLineName());
         cancelWatchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

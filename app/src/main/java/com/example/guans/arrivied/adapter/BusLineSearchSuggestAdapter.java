@@ -17,11 +17,11 @@ import java.util.List;
  * Created by guans on 2017/7/14.
  */
 
-public class BusLineSearchSugesstAdapter extends RecyclerView.Adapter <BusLineSearchSugesstAdapter.ItemHolder>{
+public class BusLineSearchSuggestAdapter extends RecyclerView.Adapter <BusLineSearchSuggestAdapter.ItemHolder>{
     private List<String> sugessutList;
     private Context mContext;
 
-    public BusLineSearchSugesstAdapter(ArrayList<String> sugessutList, Context mContext) {
+    public BusLineSearchSuggestAdapter(ArrayList<String> sugessutList, Context mContext) {
         if (sugessutList==null){
             this.sugessutList=new ArrayList<>();
         }else {

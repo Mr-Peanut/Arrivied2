@@ -21,7 +21,7 @@ import com.amap.api.services.busline.BusLineSearch;
 import com.amap.api.services.busline.BusStationQuery;
 import com.amap.api.services.busline.BusStationSearch;
 import com.example.guans.arrivied.R;
-import com.example.guans.arrivied.adapter.BusLineSearchSugesstAdapter;
+import com.example.guans.arrivied.adapter.BusLineSearchSuggestAdapter;
 import com.example.guans.arrivied.adapter.BusLinesAdapter;
 import com.example.guans.arrivied.util.LOGUtil;
 
@@ -40,8 +40,6 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
@@ -52,26 +50,15 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
     private BusLineQuery busLineQuery;
     private SearchView busSearchView;
     private String city;
-    private TextView statuText;
-    private RecyclerView sugesstList;
+    private TextView statueText;
+    private RecyclerView suggestList;
     private RecyclerView result_list;
-    private BusLineSearchSugesstAdapter sugesstAdapter;
+    private BusLineSearchSuggestAdapter suggestAdapter;
     private BusLinesAdapter busLinesAdapter;
     private SearchTask searchTask;
     private Handler mHandler;
     public BusSearchFragment() {
-        // Required empty public constructor
     }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment BusSearchFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static BusSearchFragment newInstance(String param1, String param2) {
         BusSearchFragment fragment = new BusSearchFragment();
         Bundle args = new Bundle();
@@ -99,8 +86,6 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
         initView(rootView);
         return rootView ;
     }
-
-    // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
@@ -126,10 +111,10 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
     private void initView(View rootView) {
         busSearchView= rootView.findViewById(R.id.bus_search);
         busSearchView.setSubmitButtonEnabled(true);
-        sugesstList= rootView.findViewById(R.id.sugesst_result);
-        sugesstList.setLayoutManager(new LinearLayoutManager(getContext()));
-        sugesstAdapter=new BusLineSearchSugesstAdapter(null,getContext());
-        sugesstList.setAdapter(sugesstAdapter);
+        suggestList = rootView.findViewById(R.id.sugesst_result);
+        suggestList.setLayoutManager(new LinearLayoutManager(getContext()));
+        suggestAdapter =new BusLineSearchSuggestAdapter(null,getContext());
+        suggestList.setAdapter(suggestAdapter);
         result_list= rootView. findViewById(R.id.search_result_list);
         result_list.setLayoutManager(new LinearLayoutManager(getContext()));
         busLinesAdapter=new BusLinesAdapter(null,getContext());
@@ -148,7 +133,7 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
                         searchTask.setTargetString(s);
                         mHandler.post(searchTask);
                 }
-                statuText.setText("开始搜索"+city);
+                statueText.setText("开始搜索"+city);
 //                }
                 return true;
             }
@@ -164,16 +149,16 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
                     searchTask=new SearchTask(s);
                 }
                 mHandler.postDelayed(searchTask,100);
-                statuText.setText("搜索建议"+city);
+                statueText.setText("搜索建议"+city);
                 return true;
             }
         });
-        statuText= rootView.findViewById(R.id.statue);
-        statuText.setVisibility(View.VISIBLE);
+        statueText = rootView.findViewById(R.id.statue);
+        statueText.setVisibility(View.VISIBLE);
         if(city!=null){
-            statuText.setText(city);
+            statueText.setText(city);
         }else {
-            statuText.setText("没有获取城市信息");
+            statueText.setText("没有获取城市信息");
             busSearchView.setClickable(false);
         }
     }
@@ -189,7 +174,6 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
                 busLineSearch.setOnBusLineSearchListener(BusSearchFragment.this);
             }
             busLineSearch.searchBusLineAsyn();
-
         }
     }
     private void initData() {
@@ -198,17 +182,17 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
     }
     @Override
     public void onBusLineSearched(BusLineResult busLineResult, int i) {
-        statuText.setText(busLineResult.getQuery().getQueryString());
+        statueText.setText(busLineResult.getQuery().getQueryString());
         LOGUtil.logE(this,"getLines"+String.valueOf(i));
         if(i==1000){
-            List<String> sugesstKeyWords=busLineResult.getSearchSuggestionKeywords();
+            List<String> suggestKeyWords=busLineResult.getSearchSuggestionKeywords();
             //没有获取正确的线路线索（关键字输入有误）
-            if (sugesstKeyWords!=null&&sugesstKeyWords.size()!=0){
-                sugesstAdapter.setSugessutList(sugesstKeyWords);
-                LOGUtil.logE(sugesstAdapter,String.valueOf(sugesstKeyWords.size()));
+            if (suggestKeyWords!=null&&suggestKeyWords.size()!=0){
+                suggestAdapter.setSugessutList(suggestKeyWords);
+                LOGUtil.logE(suggestAdapter,String.valueOf(suggestKeyWords.size()));
             }else {
                 if(busLineResult.getBusLines().size()==0){
-                    statuText.setText("没有搜索结果");
+                    statueText.setText("没有搜索结果");
                 }
                 busLinesAdapter.setBusLineItems(busLineResult.getBusLines());
             }
@@ -219,20 +203,7 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
     public void onLineItemClick(BusLineItem busLineItem) {
         mListener.onLineItemClicked(busLineItem);
     }
-
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
         void onLineItemClicked(BusLineItem targetLineItem);
     }

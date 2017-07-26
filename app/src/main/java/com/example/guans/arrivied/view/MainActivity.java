@@ -128,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
             if (watchingInfoFragment != null) {
 //                watchingInfoFragment.getArguments().putParcelable("STATION_ITEM", onWatchStation);
                 watchingInfoFragment.getArguments().putParcelable("ON_WATCH_ITEM", onWatchItem);
-
                 fragmentManager.beginTransaction().show(watchingInfoFragment).commit();
                 watchingInfoFragment.flush();
             } else {
@@ -136,7 +135,6 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
                 fragmentManager.beginTransaction().add(R.id.taskStatue, watchingInfoFragment, WATCH_INFO_FRAGMENT_TAG).commit();
 //                watchingInfoFragment.getArguments().putParcelable("STATION_ITEM", onWatchStation);
                 watchingInfoFragment.getArguments().putParcelable("ON_WATCH_ITEM", onWatchItem);
-
                 fragmentManager.beginTransaction().show(watchingInfoFragment).commit();
             }
         }
@@ -149,7 +147,6 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
 //            searchResultFragment.getArguments().putParcelable("STATION_ITEM", targetStationItem);
 //            searchResultFragment.getArguments().putParcelable("LINE_ITEM",targetLineItem);
             searchResultFragment.getArguments().putParcelable("WATCH_ITEM",targetItem);
-
             fragmentManager.beginTransaction().show(searchResultFragment).commit();
             searchResultFragment.flush();
         } else {
@@ -158,7 +155,6 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
 //                searchResultFragment.getArguments().putParcelable("STATION_ITEM", targetStationItem);
 //                searchResultFragment.getArguments().putParcelable("LINE_ITEM",targetLineItem);
                 searchResultFragment.getArguments().putParcelable("WATCH_ITEM",targetItem);
-
                 fragmentManager.beginTransaction().show(searchResultFragment).commit();
                 searchResultFragment.flush();
             } else {
@@ -273,7 +269,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
             geoFenceClientProxy= (GeoFenceClientProxy) iBinder;
             if(geoFenceClientProxy!=null&&geoFenceClientProxy.getGeoFences()!=null&&geoFenceClientProxy.getGeoFences().size()!=0){
 //                onWatchStation=geoFenceClientProxy.getBusStationItem();
-                targetItem=geoFenceClientProxy.getWatchItem();
+                onWatchItem=geoFenceClientProxy.getWatchItem();
                 showWatchInfoFragment();
             }
         }

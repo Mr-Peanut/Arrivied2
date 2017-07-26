@@ -45,6 +45,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     public static final int ADD_GEOFENCE_ID=100;
     public static final String ADD_GEOFENCE_SUCCESS_ACTION="com.example.guan.arrived.geofenceservice.ADD_GEOFENCE_SUCCESS";
     public static final String ARRIVED_ACTION="com.example.guan.arrived.geofenceservice.ARRIVED";
+    public static final String WAKE_UP_ACTION="com.example.guan.arrived.geofenceservice.WAKE_UP";
     private GeoFenceClient mGeoFenceClient;
     private BusStationItem stationItem;
     private GeoFenceClientProxy mGeoFenceClientProxy;
@@ -80,7 +81,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         controller=new ControllerReceiver(this);
         IntentFilter controlIntentFilter=new IntentFilter();
         controlIntentFilter.addAction(GEOFENCE_CANCLE_ATCITON);
-        controlIntentFilter.addAction("wakeup");
+        controlIntentFilter.addAction(WAKE_UP_ACTION);
         controlIntentFilter.addAction(ARRIVED_ACTION);
         registerReceiver(controller,controlIntentFilter);
         handler=new Handler(getMainLooper());
@@ -92,7 +93,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         //保持cpu一直运行，不管屏幕是否黑屏
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CPUKeepRunning");
         alarmManager = (AlarmManager) getSystemService(Service.ALARM_SERVICE);
-        wakeupPendingIntent =PendingIntent.getBroadcast(this,0,new Intent("wakeup"),PendingIntent.FLAG_UPDATE_CURRENT);
+        wakeupPendingIntent =PendingIntent.getBroadcast(this,0,new Intent(WAKE_UP_ACTION),PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     @Override
@@ -118,8 +119,13 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         Intent startLaunchActivity=new Intent(this, MainActivity.class);
         PendingIntent pendingIntent=PendingIntent.getActivity(this,100,startLaunchActivity,PendingIntent.FLAG_UPDATE_CURRENT);
         Notification notification= null;
+        RemoteViews remoteViews=null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            RemoteViews remoteViews=new RemoteViews(getPackageName(),R.layout.watching_notification_view);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+               remoteViews=new RemoteViews(getPackageName(),R.layout.watching_notification_view);
+            }else {
+                remoteViews=new RemoteViews(getPackageName(),R.layout.watching_notification_view_small);
+            }
             Intent cancelIntent=new Intent(GEOFENCE_CANCLE_ATCITON);
             remoteViews.setOnClickPendingIntent(R.id.cancel_watch,PendingIntent.getBroadcast(getApplicationContext(),0,cancelIntent,PendingIntent.FLAG_UPDATE_CURRENT));
             remoteViews.setTextViewText(R.id.station_info,"您设置了"+stationItem.getBusStationName());
@@ -130,10 +136,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                     .setWhen(System.currentTimeMillis())
                     .setContentIntent(pendingIntent);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                builder.setStyle(new Notification.BigPictureStyle())
-                        .setCustomBigContentView(remoteViews);
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//                builder.setStyle(new Notification.BigPictureStyle());
+//                builder.setCustomBigContentView(remoteViews);
                 builder.setCustomContentView(remoteViews);
             }else {
                 builder.setContent(remoteViews);
@@ -241,8 +245,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                if(wakeLock.isHeld())
                wakeLock.release();
                break;
-           case "wakeup":
-               LOGUtil.logE(this,"wakeup");
+           case WAKE_UP_ACTION:
                break;
            case ARRIVED_ACTION:
                mGeoFenceClientProxy.removeDPoint();

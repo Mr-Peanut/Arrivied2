@@ -29,7 +29,7 @@ public class SearchActivity extends AppCompatActivity implements BusSearchFragme
         fragmentManager=getSupportFragmentManager();
         busSearchFragment=BusSearchFragment.newInstance("one","two");
         fragmentManager.beginTransaction()
-                .add(R.id.container,busSearchFragment,"searchFragmet").commit();
+                .add(R.id.container,busSearchFragment,"searchFragment").commit();
 //                replace(R.id.container,busSearchFragment).commit();
     }
     @Override
@@ -55,11 +55,11 @@ public class SearchActivity extends AppCompatActivity implements BusSearchFragme
         getIntent().putExtra("BUS_LINE_ITEM",targetLineItem);
         LOGUtil.logE(this,targetLineItem.getBusLineName());
         if(stationChosenFragment==null) {
-            stationChosenFragment=StationChosenFragment.newInstance("1","2");
+            stationChosenFragment=StationChosenFragment.newInstance();
             fragmentManager.beginTransaction().add(R.id.container,stationChosenFragment,"stationChosenFragment").commit();
         }else
             stationChosenFragment.flushData();
-        fragmentManager.beginTransaction().show(stationChosenFragment).hide(busSearchFragment).addToBackStack("searchFragmet").commit();
+        fragmentManager.beginTransaction().show(stationChosenFragment).hide(busSearchFragment).addToBackStack("searchFragment").commit();
 
     }
 }

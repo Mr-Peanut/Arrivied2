@@ -29,21 +29,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link MapFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link MapFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class MapFragment extends Fragment implements AMap.OnMarkerClickListener {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
     private AMap aMap;
@@ -61,18 +51,8 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
     private CameraPosition cameraPosition;
 
     public MapFragment() {
-        // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MapFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static MapFragment newInstance(String param1, String param2) {
         MapFragment fragment = new MapFragment();
         Bundle args = new Bundle();
@@ -131,7 +111,7 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
             LatLng center=new LatLng((leftUp.getLongitude()+rightDown.getLongitude())/2,(leftUp.getLatitude()+rightDown.getLatitude())/2);
             try {
                 LatLngBounds latLngBounds1=new LatLngBounds(new LatLng(leftUp.getLatitude(),leftUp.getLongitude()),new LatLng(rightDown.getLatitude(),rightDown.getLongitude()));
-                CameraUpdate cameraUpdate=CameraUpdateFactory.newLatLngBounds(latLngBounds1,50);
+                CameraUpdate cameraUpdate=CameraUpdateFactory.newLatLngBounds(latLngBounds1,450);
                 aMap.moveCamera(cameraUpdate);
             } catch (AMapException e) {
                 e.printStackTrace();
@@ -156,7 +136,6 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
 //        myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_MAP_ROTATE_NO_CENTER);//连续定位、蓝点不会移动到地图中心点，地图依照设备方向旋转，并且蓝点会跟随设备移动。
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
@@ -219,6 +198,7 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
         super.onDestroy();
     }
     public void flush(){
+        busLineItem=getArguments().getParcelable("LINE_ITEM");
         initBusLineOnMap();
     }
 
