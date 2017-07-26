@@ -103,7 +103,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         addGeoFence(intent);
         startAlarmTask();
 //        }
-        return Service.START_STICKY;
+        return Service.START_NOT_STICKY;
     }
     /*
      *息屏时保证系统不休眠
@@ -111,7 +111,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
 
     private void startAlarmTask() {
 //        if(isWatching){
-        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,0,5000, wakeupPendingIntent);
+        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,0,10000, wakeupPendingIntent);
         wakeLock.acquire();
     }
 
@@ -130,15 +130,15 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             remoteViews.setOnClickPendingIntent(R.id.cancel_watch,PendingIntent.getBroadcast(getApplicationContext(),0,cancelIntent,PendingIntent.FLAG_UPDATE_CURRENT));
             remoteViews.setTextViewText(R.id.station_info,"您设置了"+stationItem.getBusStationName());
             Notification.Builder builder=new Notification.Builder(getApplicationContext())
-                    .setContentTitle(getPackageName())
-                    .setContentText("正在监控"+stationItem.getBusStationName()+"/n"+watchItem.getBusLineItem().getBusLineName())
-                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle("Arrived")
+                    .setContentText("正在监控"+stationItem.getBusStationName()+"\n"+watchItem.getBusLineItem().getBusLineName())
+                    .setSmallIcon(R.drawable.bus_station)
                     .setWhen(System.currentTimeMillis())
                     .setContentIntent(pendingIntent);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//                builder.setStyle(new Notification.BigPictureStyle());
-//                builder.setCustomBigContentView(remoteViews);
-                builder.setCustomContentView(remoteViews);
+                builder.setStyle(new Notification.BigPictureStyle());
+                builder.setCustomBigContentView(remoteViews);
+//                builder.setCustomContentView(remoteViews);
             }else {
                 builder.setContent(remoteViews);
             }
@@ -181,6 +181,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         unregisterReceiver(controller);
         if(wakeLock.isHeld())
             wakeLock.release();
+        LOGUtil.logE(this,"onDestory");
         super.onDestroy();
     }
 
@@ -216,8 +217,10 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         Intent removeGeoFenceIntent=new Intent(ACTION_GEOFENCE_REMOVED);
         isWatching=false;
         alarmManager.cancel(wakeupPendingIntent);
-        if(wakeLock.isHeld())
+        if(wakeLock.isHeld()){
+            LOGUtil.logE(this,"releaseLock");
             wakeLock.release();
+        }
         sendBroadcast(removeGeoFenceIntent);
         stopSelf();
     }
@@ -247,12 +250,14 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                wakeLock.release();
                break;
            case WAKE_UP_ACTION:
+               LOGUtil.logE(this,"wakeup");
                break;
            case ARRIVED_ACTION:
                mGeoFenceClientProxy.removeDPoint();
+               if(wakeLock.isHeld())
                wakeLock.release();
                alarmManager.cancel(wakeupPendingIntent);
-
+               stopSelf();
                break;
        }
     }

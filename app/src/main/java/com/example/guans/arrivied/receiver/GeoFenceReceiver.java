@@ -61,9 +61,10 @@ public class GeoFenceReceiver extends BroadcastReceiver {
         PendingIntent arrivedPendingIntent=PendingIntent.getBroadcast(context,99,intent,PendingIntent.FLAG_UPDATE_CURRENT);
         Notification notification = new Notification.Builder(context.getApplicationContext())
                 .setSmallIcon(R.drawable.bus_station)
-                .setContentTitle(context.getPackageName())
-                .setContentText("您已经到达")
+                .setContentTitle("Arrived 友情提示")
+                .setContentText("您已经到站，请准备下车")
                 .setWhen(System.currentTimeMillis())
+                .setTicker("您已到站！")
                 .setContentIntent(arrivedPendingIntent)
                 .setAutoCancel(true)
                 .setPriority(Notification.PRIORITY_MAX)
