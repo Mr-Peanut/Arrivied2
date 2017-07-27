@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
     private SearchResultFragment searchResultFragment;
     private WatchItem targetItem;
     private WatchItem onWatchItem;
+    private TextView busSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
             @Override
             public void run() {
                 if(city==null) {
-                    locationCity.setText("无法定位");
+                    locationCity.setText("无法定位，请检查定位和网络权限后点击重试");
                 }
               }
             };
@@ -91,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
 //       });
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        TextView busSearch = (TextView) findViewById(R.id.bus_search);
+        busSearch = (TextView) findViewById(R.id.bus_search);
         locationCity= (TextView) findViewById(R.id.locationCity);
         locationCity.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -183,11 +184,32 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
     public void onControlBroadcastReceive(Intent intent) {
         switch (intent.getAction()){
             case LocateService.ACTION_LOCATION_RESULT:
-                mHandler.removeCallbacks(locationNoResultRunnable);
                 AMapLocation result=intent.getParcelableExtra("LocationResult");
-                city=result.getCity();
-                locationCity.setText(result.getCity());
-                LOGUtil.logE(this,String.valueOf(result.getLatitude())+"/"+String.valueOf(result.getLongitude()));
+                            if (result.getErrorCode() == 0) {
+                                mHandler.removeCallbacks(locationNoResultRunnable);
+                                city=result.getCity();
+                                locationCity.setText(result.getCity());
+                                busSearch.setVisibility(View.VISIBLE);
+
+                            }else {
+
+                                showErrorPage();
+                            }
+//                //定位成功回调信息，设置相关消息
+//                amapLocation.getLocationType();//获取当前定位结果来源，如网络定位结果，详见定位类型表
+//                amapLocation.getLatitude();//获取纬度
+//                amapLocation.getLongitude();//获取经度
+//                amapLocation.getAccuracy();//获取精度信息
+//                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                Date date = new Date(amapLocation.getTime());
+//                df.format(date);//定位时间
+//            } else {
+//                //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
+//                Log.e("AmapError","location Error, ErrCode:"
+//                        + amapLocation.getErrorCode() + ", errInfo:"
+//                        + amapLocation.getErrorInfo());
+//            }
+
                 break;
             case GeoFenceService.ADD_GEOFENCE_SUCCESS_ACTION:
 //                onWatchStation=intent.getParcelableExtra("ON_WATCH_STATION");
@@ -202,6 +224,12 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         }
 
     }
+
+    private void showErrorPage() {
+        busSearch.setVisibility(View.GONE);
+
+    }
+
     @Override
     protected void onDestroy() {
         if (receiver != null) {

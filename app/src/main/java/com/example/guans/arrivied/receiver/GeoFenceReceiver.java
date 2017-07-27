@@ -9,11 +9,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.amap.api.fence.GeoFence;
+import com.example.guans.arrivied.HeadUpNotification.HeadUpManager;
 import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.service.GeoFenceService;
 import com.example.guans.arrivied.util.LOGUtil;
@@ -60,12 +65,7 @@ public class GeoFenceReceiver extends BroadcastReceiver {
 //        handler.postDelayed(new Runnable() {
 //            @Override
 //            public void run() {
-//                if(isKeyLocked(context)||!isScreenOn(context)){
-//                    startNotifiedActivity(context,intent);
-//                }else {
-                    startNotification(context,intent);
-
-//                }
+                startNotification(context, intent);
 //            }
 //        },20*1000);
     }
@@ -107,6 +107,13 @@ public class GeoFenceReceiver extends BroadcastReceiver {
 //        notification.flags=Notification.FLAG_ONLY_ALERT_ONCE|Notification.FLAG_AUTO_CANCEL;
         final NotificationManager notificationManager= (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(GeoFenceService.ARRIVED_NOTIFICATION_ID,notification);
+//        if(Build.VERSION.SDK_INT <Build.VERSION_CODES.LOLLIPOP){
+//            HeadUpManager headUpManager=new HeadUpManager(context);
+//            LayoutInflater layoutInflater= (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//            View view=layoutInflater.inflate(headUpView.getLayoutId(),null);
+//            headUpManager.showHeadUp(view,GeoFenceService.ARRIVED_NOTIFICATION_ID);
+//        }
+
         if(!isScreenOn(context)||isKeyLocked(context))
         startNotifiedActivity(context, intent);
     }

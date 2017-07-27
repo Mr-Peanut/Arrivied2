@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.support.v7.app.NotificationCompat;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -122,28 +123,36 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         Notification notification= null;
         RemoteViews remoteViews=null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                remoteViews=new RemoteViews(getPackageName(),R.layout.watching_notification_view);
-            }else {
-                remoteViews=new RemoteViews(getPackageName(),R.layout.watching_notification_view_small);
-            }
+//            }else {
+//                remoteViews=new RemoteViews(getPackageName(),R.layout.watching_notification_view_small);
+//            }
             Intent cancelIntent=new Intent(GEOFENCE_CANCLE_ATCITON);
             remoteViews.setOnClickPendingIntent(R.id.cancel_watch,PendingIntent.getBroadcast(getApplicationContext(),0,cancelIntent,PendingIntent.FLAG_UPDATE_CURRENT));
             remoteViews.setTextViewText(R.id.station_info,"您设置了"+stationItem.getBusStationName());
-            Notification.Builder builder=new Notification.Builder(getApplicationContext())
-                    .setContentTitle("Arrived")
+            NotificationCompat.Builder notificationBuilder=new NotificationCompat.Builder(this);
+            notificationBuilder.setContentTitle("Arrived")
                     .setContentText("正在监控"+stationItem.getBusStationName()+"\n"+watchItem.getBusLineItem().getBusLineName())
                     .setSmallIcon(R.drawable.bus_station)
                     .setWhen(System.currentTimeMillis())
-                    .setContentIntent(pendingIntent);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                builder.setStyle(new Notification.BigPictureStyle());
-                builder.setCustomBigContentView(remoteViews);
-//                builder.setCustomContentView(remoteViews);
-            }else {
-                builder.setContent(remoteViews);
-            }
-            notification=builder.build();
+                    .setContentIntent(pendingIntent)
+                    .setStyle(new NotificationCompat.BigPictureStyle())
+                    .setCustomBigContentView(remoteViews);
+//            Notification.Builder builder=new Notification.Builder(getApplicationContext())
+//                    .setContentTitle("Arrived")
+//                    .setContentText("正在监控"+stationItem.getBusStationName()+"\n"+watchItem.getBusLineItem().getBusLineName())
+//                    .setSmallIcon(R.drawable.bus_station)
+//                    .setWhen(System.currentTimeMillis())
+//                    .setContentIntent(pendingIntent);
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//                builder.setStyle(new Notification.BigPictureStyle());
+//                builder.setCustomBigContentView(remoteViews);
+////                builder.setCustomContentView(remoteViews);
+//            }else {
+//                builder.setContent(remoteViews);
+//            }
+            notification=notificationBuilder.build();
         }
         startForeground(ADD_GEOFENCE_ID,notification);
     }
@@ -160,7 +169,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         DPoint dPoint = new DPoint();
         dPoint.setLatitude(stationItem.getLatLonPoint().getLatitude());
         dPoint.setLongitude(stationItem.getLatLonPoint().getLongitude());
-        mGeoFenceClient.addGeoFence(dPoint,1000f, "BUS_STATION");
+        mGeoFenceClient.addGeoFence(dPoint,80f, "BUS_STATION");
     }
 
     @Override
