@@ -24,4 +24,5 @@
     <string name="action_share">Share</string>
     <string name="action_reply">Reply</string>
     <string name="target_info">目标站点：</string>
+    <string name="query_hint">请输入线路编号</string>
 </resources>
