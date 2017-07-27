@@ -1,5 +1,6 @@
 package com.example.guans.arrivied.receiver;
 
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -8,6 +9,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.PowerManager;
 import android.support.annotation.RequiresApi;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -47,10 +51,8 @@ public class GeoFenceReceiver extends BroadcastReceiver {
                 break;
             case GEOFENCE_OUT:
                 LOGUtil.logE(context,"GEOFENCE_OUT"+context.toString());
-//                Toast.makeText(context,"GEOFENCE_OUT",Toast.LENGTH_LONG).show();
                 break;
             case GEOFENCE_STAYED:
-//                Toast.makeText(context,"GEOFENCE_STAYEC",Toast.LENGTH_LONG).show();
                 break;
         }
     }
@@ -59,9 +61,11 @@ public class GeoFenceReceiver extends BroadcastReceiver {
     private void notifyArrived(Context context, Intent intent) {
         Intent intent2=new Intent(context,MainActivity.class);
         intent2.setFlags(FLAG_ACTIVITY_NEW_TASK);
+        Handler handler=new Handler(Looper.getMainLooper());
+
         PendingIntent arrivedPendingIntent=PendingIntent.getActivity(context,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
         RemoteViews headUpView=new RemoteViews("com.example.guans.arrivied",R.layout.arrived_notification_head_up_view);
-        Notification notification=new android.support.v7.app.NotificationCompat.Builder(context)
+        final Notification notification=new android.support.v7.app.NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.bus_station)
                 .setContentTitle("Arrived 友情提示")
                 .setContentText("您已经到站，请准备下车,滑动或点击停止提醒")
@@ -72,23 +76,36 @@ public class GeoFenceReceiver extends BroadcastReceiver {
                 .setCustomHeadsUpContentView(headUpView)
                 .setPriority(Notification.PRIORITY_MAX)
                 .setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                .setFullScreenIntent(arrivedPendingIntent,true)
+//                .setFullScreenIntent(arrivedPendingIntent,false)
                 .build();
-//        Notification notification = new Notification.Builder(context.getApplicationContext())
-//                .setSmallIcon(R.drawable.bus_station)
-//                .setContentTitle("Arrived 友情提示")
-//                .setContentText("您已经到站，请准备下车,滑动或点击停止提醒")
-//                .setWhen(System.currentTimeMillis())
-//                .setTicker("您已到站！")
-//                .setAutoCancel(true)
-//                .setContentIntent(arrivedPendingIntent)
-//                .setPriority(Notification.PRIORITY_MAX)
-//                .setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-//                .build();
-        notification.flags=Notification.FLAG_INSISTENT|Notification.FLAG_AUTO_CANCEL;
-        NotificationManager notificationManager= (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(GeoFenceService.ARRIVED_NOTIFICATION_ID,notification);
+//        notification.flags=Notification.FLAG_INSISTENT|Notification.FLAG_AUTO_CANCEL;
+        notification.flags=Notification.FLAG_ONLY_ALERT_ONCE|Notification.FLAG_AUTO_CANCEL;
+        final NotificationManager notificationManager= (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+//        notificationManager.notify(GeoFenceService.ARRIVED_NOTIFICATION_ID,notification);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                notificationManager.notify(GeoFenceService.ARRIVED_NOTIFICATION_ID,notification);
+            }
+        },60*1000);
         Intent arrivedIntent=new Intent(GeoFenceService.ARRIVED_ACTION);
         context.sendBroadcast(arrivedIntent);
     }
+    private boolean isKeyLocked(Context context){
+        KeyguardManager keyguardManager= (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            return keyguardManager.isDeviceLocked()||keyguardManager.isKeyguardLocked();
+        }else {
+            return keyguardManager.isKeyguardLocked();
+        }
+    }
+    private boolean isScreenOn(Context context){
+        PowerManager powerManager= (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            return powerManager.isInteractive();
+        }else {
+            return powerManager.isScreenOn();
+        }
+    }
+
 }

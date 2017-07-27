@@ -3,9 +3,13 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <TextView
+        android:padding="10dp"
+        android:layout_gravity="center"
+        android:gravity="center"
         android:id="@+id/head_up_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="#000000"
         android:text="@string/arrived_notification_content"/>
 
 </LinearLayout>

@@ -160,7 +160,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         DPoint dPoint = new DPoint();
         dPoint.setLatitude(stationItem.getLatLonPoint().getLatitude());
         dPoint.setLongitude(stationItem.getLatLonPoint().getLongitude());
-        mGeoFenceClient.addGeoFence(dPoint,80f, "BUS_STATION");
+        mGeoFenceClient.addGeoFence(dPoint,1000f, "BUS_STATION");
     }
 
     @Override
