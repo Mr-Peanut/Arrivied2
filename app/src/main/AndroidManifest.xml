@@ -100,9 +100,16 @@
         <service
             android:name=".service.OfflineLocationService"
             android:enabled="true"
-            android:exported="true" />
-
-        <activity android:name=".view.NoticeActivity"></activity>
+            android:exported="false"
+             />
+        <activity
+            android:theme="@style/FullScreenTheme"
+            android:name=".view.NoticeActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleInstance"
+            android:exported="true"
+            >
+        </activity>
     </application>
 
 </manifest>

@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.support.annotation.RequiresApi;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -21,6 +20,7 @@ import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.service.GeoFenceService;
 import com.example.guans.arrivied.util.LOGUtil;
 import com.example.guans.arrivied.view.MainActivity;
+import com.example.guans.arrivied.view.NoticeActivity;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static com.amap.api.fence.GeoFenceClient.GEOFENCE_IN;
@@ -29,7 +29,6 @@ import static com.amap.api.fence.GeoFenceClient.GEOFENCE_STAYED;
 
 public class GeoFenceReceiver extends BroadcastReceiver {
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void onReceive(Context context, Intent intent) {
         //获取Bundle
@@ -56,13 +55,40 @@ public class GeoFenceReceiver extends BroadcastReceiver {
                 break;
         }
     }
-
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    private void notifyArrived(Context context, Intent intent) {
+    private void notifyArrived(final Context context, final Intent intent) {
+        Intent arrivedIntent=new Intent(GeoFenceService.ARRIVED_ACTION);
+        context.sendBroadcast(arrivedIntent);
+        Handler handler=new Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(isKeyLocked(context)||!isScreenOn(context)){
+                    startNotifiedActivity(context,intent);
+                }else {
+                    startNotifiedActivity(context,intent);
+                }
+            }
+        },20*1000);
+    }
+    private boolean isKeyLocked(Context context){
+        KeyguardManager keyguardManager= (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            return keyguardManager.isDeviceLocked()||keyguardManager.isKeyguardLocked();
+        }else {
+            return keyguardManager.isKeyguardLocked();
+        }
+    }
+    private boolean isScreenOn(Context context){
+        PowerManager powerManager= (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            return powerManager.isInteractive();
+        }else {
+            return powerManager.isScreenOn();
+        }
+    }
+    private void startNotification(Context context,Intent intent){
         Intent intent2=new Intent(context,MainActivity.class);
         intent2.setFlags(FLAG_ACTIVITY_NEW_TASK);
-        Handler handler=new Handler(Looper.getMainLooper());
-
         PendingIntent arrivedPendingIntent=PendingIntent.getActivity(context,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
         RemoteViews headUpView=new RemoteViews("com.example.guans.arrivied",R.layout.arrived_notification_head_up_view);
         final Notification notification=new android.support.v7.app.NotificationCompat.Builder(context)
@@ -81,31 +107,12 @@ public class GeoFenceReceiver extends BroadcastReceiver {
 //        notification.flags=Notification.FLAG_INSISTENT|Notification.FLAG_AUTO_CANCEL;
         notification.flags=Notification.FLAG_ONLY_ALERT_ONCE|Notification.FLAG_AUTO_CANCEL;
         final NotificationManager notificationManager= (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-//        notificationManager.notify(GeoFenceService.ARRIVED_NOTIFICATION_ID,notification);
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                notificationManager.notify(GeoFenceService.ARRIVED_NOTIFICATION_ID,notification);
-            }
-        },60*1000);
-        Intent arrivedIntent=new Intent(GeoFenceService.ARRIVED_ACTION);
-        context.sendBroadcast(arrivedIntent);
-    }
-    private boolean isKeyLocked(Context context){
-        KeyguardManager keyguardManager= (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            return keyguardManager.isDeviceLocked()||keyguardManager.isKeyguardLocked();
-        }else {
-            return keyguardManager.isKeyguardLocked();
-        }
-    }
-    private boolean isScreenOn(Context context){
-        PowerManager powerManager= (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
-            return powerManager.isInteractive();
-        }else {
-            return powerManager.isScreenOn();
-        }
-    }
+        notificationManager.notify(GeoFenceService.ARRIVED_NOTIFICATION_ID,notification);
 
+    }
+    private void startNotifiedActivity(Context context,Intent intent){
+        Intent notificationIntent=new Intent(context, NoticeActivity.class);
+        notificationIntent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(notificationIntent);
+    }
 }
