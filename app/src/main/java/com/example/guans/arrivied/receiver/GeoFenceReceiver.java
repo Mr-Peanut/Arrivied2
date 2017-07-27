@@ -62,11 +62,12 @@ public class GeoFenceReceiver extends BroadcastReceiver {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(isKeyLocked(context)||!isScreenOn(context)){
-                    startNotifiedActivity(context,intent);
-                }else {
-                    startNotifiedActivity(context,intent);
-                }
+//                if(isKeyLocked(context)||!isScreenOn(context)){
+//                    startNotifiedActivity(context,intent);
+//                }else {
+                    startNotification(context,intent);
+
+//                }
             }
         },20*1000);
     }
@@ -104,11 +105,12 @@ public class GeoFenceReceiver extends BroadcastReceiver {
                 .setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
 //                .setFullScreenIntent(arrivedPendingIntent,false)
                 .build();
-//        notification.flags=Notification.FLAG_INSISTENT|Notification.FLAG_AUTO_CANCEL;
-        notification.flags=Notification.FLAG_ONLY_ALERT_ONCE|Notification.FLAG_AUTO_CANCEL;
+        notification.flags=Notification.FLAG_INSISTENT|Notification.FLAG_AUTO_CANCEL;
+//        notification.flags=Notification.FLAG_ONLY_ALERT_ONCE|Notification.FLAG_AUTO_CANCEL;
         final NotificationManager notificationManager= (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(GeoFenceService.ARRIVED_NOTIFICATION_ID,notification);
-
+        if(!isScreenOn(context)||isKeyLocked(context))
+        startNotifiedActivity(context, intent);
     }
     private void startNotifiedActivity(Context context,Intent intent){
         Intent notificationIntent=new Intent(context, NoticeActivity.class);
