@@ -9,8 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -58,18 +56,18 @@ public class GeoFenceReceiver extends BroadcastReceiver {
     private void notifyArrived(final Context context, final Intent intent) {
         Intent arrivedIntent=new Intent(GeoFenceService.ARRIVED_ACTION);
         context.sendBroadcast(arrivedIntent);
-        Handler handler=new Handler(Looper.getMainLooper());
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
+//        Handler handler=new Handler(Looper.getMainLooper());
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
 //                if(isKeyLocked(context)||!isScreenOn(context)){
 //                    startNotifiedActivity(context,intent);
 //                }else {
                     startNotification(context,intent);
 
 //                }
-            }
-        },20*1000);
+//            }
+//        },20*1000);
     }
     private boolean isKeyLocked(Context context){
         KeyguardManager keyguardManager= (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
