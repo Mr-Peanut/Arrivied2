@@ -51,6 +51,7 @@ public class OfflineLocationClient extends Binder {
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, invigiat, distance, locationListener);
 
+
     }
     public void stopLocation(LocationListener locationListener){
         locationManager.removeUpdates(locationListener);
