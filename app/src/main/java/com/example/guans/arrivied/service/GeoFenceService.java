@@ -7,6 +7,9 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -55,10 +58,12 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     private boolean isWatching=false;
     private ScreenChangeReceiver screenChangeReceiver;
     private ControllerReceiver controller;
-//    private AlarmManager alarmManager;
-//    private PendingIntent wakeupPendingIntent;
-    private PowerManager pm;
+    private AlarmManager alarmManager;
+    private PendingIntent wakeupPendingIntent;
     private Handler handler;
+    private ConnectivityManager connectivityManager;
+    private LocationManager locationManager;
+
     private WatchItem watchItem;
     private Runnable tryAddDeoFenceAgainRunnable =new Runnable() {
         @Override
@@ -67,6 +72,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             Toast.makeText(getApplicationContext(),"add again",Toast.LENGTH_SHORT).show();
         }
     };
+
     public GeoFenceService() {
     }
     @Override
@@ -85,17 +91,21 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         controlIntentFilter.addAction(GEOFENCE_CANCLE_ATCITON);
         controlIntentFilter.addAction(WAKE_UP_ACTION);
         controlIntentFilter.addAction(ARRIVED_ACTION);
+        controlIntentFilter.addAction(LocationManager.PROVIDERS_CHANGED_ACTION);
+        controlIntentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(controller,controlIntentFilter);
         handler=new Handler(getMainLooper());
         prepareAliveAction();
+        connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
     }
 
     private void prepareAliveAction() {
-        pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         //保持cpu一直运行，不管屏幕是否黑屏
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CPUKeepRunning");
-//        alarmManager = (AlarmManager) getSystemService(Service.ALARM_SERVICE);
-//        wakeupPendingIntent =PendingIntent.getBroadcast(this,0,new Intent(WAKE_UP_ACTION),PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager = (AlarmManager) getSystemService(Service.ALARM_SERVICE);
+        wakeupPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(WAKE_UP_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     @Override
@@ -113,7 +123,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
 
     private void startAlarmTask() {
 //        if(isWatching){
-//        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,0,10000, wakeupPendingIntent);
+        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 5000, 60 * 1000, wakeupPendingIntent);
         wakeLock.acquire();
     }
 
@@ -138,20 +148,9 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                     .setWhen(System.currentTimeMillis())
                     .setContentIntent(pendingIntent)
                     .setStyle(new NotificationCompat.BigPictureStyle())
+                    .setOngoing(true)
                     .setCustomBigContentView(remoteViews);
-//            Notification.Builder builder=new Notification.Builder(getApplicationContext())
-//                    .setContentTitle("Arrived")
-//                    .setContentText("正在监控"+stationItem.getBusStationName()+"\n"+watchItem.getBusLineItem().getBusLineName())
-//                    .setSmallIcon(R.drawable.bus_station)
-//                    .setWhen(System.currentTimeMillis())
-//                    .setContentIntent(pendingIntent);
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//                builder.setStyle(new Notification.BigPictureStyle());
-//                builder.setCustomBigContentView(remoteViews);
-////                builder.setCustomContentView(remoteViews);
-//            }else {
-//                builder.setContent(remoteViews);
-//            }
+
             notification=notificationBuilder.build();
         }
         startForeground(ADD_GEOFENCE_ID,notification);
@@ -169,7 +168,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         DPoint dPoint = new DPoint();
         dPoint.setLatitude(stationItem.getLatLonPoint().getLatitude());
         dPoint.setLongitude(stationItem.getLatLonPoint().getLongitude());
-        mGeoFenceClient.addGeoFence(dPoint,80f, "BUS_STATION");
+        mGeoFenceClient.addGeoFence(dPoint, 150f, "BUS_STATION");
     }
 
     @Override
@@ -191,7 +190,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         unregisterReceiver(controller);
         if(wakeLock.isHeld())
             wakeLock.release();
-        LOGUtil.logE(this,"onDestory");
+        LOGUtil.logE(this, "onDestroy");
         super.onDestroy();
     }
 
@@ -226,7 +225,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         stopForeground(true);
         Intent removeGeoFenceIntent=new Intent(ACTION_GEOFENCE_REMOVED);
         isWatching=false;
-//        alarmManager.cancel(wakeupPendingIntent);
+        alarmManager.cancel(wakeupPendingIntent);
         if(wakeLock.isHeld()){
             LOGUtil.logE(this,"releaseLock");
             wakeLock.release();
@@ -249,7 +248,6 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             }
         }
     }
-
     @Override
     public void onControlBroadcastReceive(Intent intent) {
         LOGUtil.logE(this,intent.getAction());
@@ -262,15 +260,32 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                break;
            case WAKE_UP_ACTION:
                LOGUtil.logE(this,"wakeup");
+               if (!checkNetStatueIsAlive()) {
+                   LOGUtil.logE(this, "net not available");
+               }
                break;
            case ARRIVED_ACTION:
                mGeoFenceClientProxy.removeDPoint();
                if(wakeLock.isHeld())
                wakeLock.release();
-//               alarmManager.cancel(wakeupPendingIntent);
+               alarmManager.cancel(wakeupPendingIntent);
                LOGUtil.logE(this,"arrived");
                stopSelf();
                break;
+           case ConnectivityManager.CONNECTIVITY_ACTION:
+               NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+               LOGUtil.logE(this, networkInfo.getDetailedState().toString());
+               break;
+           case LocationManager.PROVIDERS_CHANGED_ACTION:
+               if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                   LOGUtil.logE(this, "gps is disable");
+               }
+               break;
        }
+    }
+
+    private boolean checkNetStatueIsAlive() {
+        NetworkInfo netInfo = connectivityManager.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isAvailable() && netInfo.isConnected();
     }
 }
