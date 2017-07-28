@@ -10,8 +10,6 @@ import android.location.LocationManager;
 import android.os.Binder;
 import android.support.v4.app.ActivityCompat;
 
-import com.amap.api.location.DPoint;
-import com.example.guans.arrivied.util.GPS2AMap;
 import com.example.guans.arrivied.util.LOGUtil;
 
 /**
@@ -22,11 +20,6 @@ public class OfflineLocationClient extends Binder {
     private Context mContext;
     private LocationManager locationManager;
 //    private GPS2AMap gps2AMap;
-
-    public void setLocationListener(LocationListener locationListener) {
-        this.locationListener = locationListener;
-    }
-
     private LocationListener locationListener;
 
     public OfflineLocationClient(Context mContext) {
@@ -35,7 +28,11 @@ public class OfflineLocationClient extends Binder {
 //        gps2AMap=new GPS2AMap(mContext);
     }
 
-    public void startLocation(LocationListener locationListener) {
+    public void setLocationListener(LocationListener locationListener) {
+        this.locationListener = locationListener;
+    }
+
+    public void startLocation(long invigiat, float distance, LocationListener locationListener) {
         setLocationListener(locationListener);
         if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -49,11 +46,10 @@ public class OfflineLocationClient extends Binder {
             return;
         }
         Location last=locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        LOGUtil.logE(this,String.valueOf(last.getLatitude())+"/"+String.valueOf(last.getLongitude()));
 //        DPoint dPoint=gps2AMap.gps2AMap(last);
 //        LOGUtil.logE(this,"转换之后的坐标"+String.valueOf(dPoint.getLatitude())+"/"+String.valueOf(dPoint.getLongitude()));
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 50, locationListener);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, invigiat, distance, locationListener);
 
     }
     public void stopLocation(LocationListener locationListener){
