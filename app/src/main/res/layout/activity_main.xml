@@ -26,28 +26,28 @@
 
         <TextView
             android:id="@+id/bus_search"
-            android:visibility="invisible"
             android:layout_width="wrap_content"
-            android:minWidth="200dp"
-            android:layout_height="match_parent"
+            android:layout_height="20dp"
+            android:layout_weight="0.57"
             android:background="#ffffff"
             android:hint="搜索车站或线路"
+            android:minWidth="200dp"
             android:textColor="@android:color/black"
-            android:layout_weight="0.57" />
+            android:visibility="invisible" />
     </android.support.v7.widget.Toolbar>
 
     <FrameLayout
         android:id="@+id/taskStatue"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp">
     </FrameLayout>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
-            xmlns:tools="http://schemas.android.com/tools"
+        <LinearLayout xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"

@@ -1,50 +1,62 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.example.guans.arrivied.fragment.StationChosenFragment">
+
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <LinearLayout
+        android:layout_height="wrap_content"
+        android:minHeight="40dp"
             android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        android:paddingBottom="3dp"
+        android:paddingEnd="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingStart="2dp"
+        android:paddingTop="3dp">
             <TextView
                 android:id="@+id/line_info"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="2"
                 android:gravity="center"
-                android:text="@string/hello_blank_fragment"
-                android:layout_weight="2"/>
+                android:paddingEnd="2dp"
+                android:paddingStart="2dp"
+                android:text="@string/hello_blank_fragment" />
             <RadioGroup
                 android:id="@+id/show_style_choose"
-                android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="2dp"
+                android:layout_marginStart="2dp"
+                android:layout_weight="1"
                 android:orientation="horizontal">
                 <RadioButton
                     android:id="@+id/show_in_list"
-                    android:text="列表显示"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checked="true"/>
+                    android:checked="true"
+                    android:text="列表显示" />
                 <RadioButton
                     android:id="@+id/show_in_map"
-                    android:text="地图上显示"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:text="地图显示" />
             </RadioGroup>
         </LinearLayout>
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:background="#cccccc" />
         <FrameLayout
             android:id="@+id/line_item_window"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
         </FrameLayout>
-
     </LinearLayout>
 
-
-
-</FrameLayout>

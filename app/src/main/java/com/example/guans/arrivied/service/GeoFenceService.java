@@ -25,6 +25,7 @@ import com.amap.api.location.DPoint;
 import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.bean.GeoFenceClientProxy;
+import com.example.guans.arrivied.bean.OfflineLocationClient;
 import com.example.guans.arrivied.bean.WatchItem;
 import com.example.guans.arrivied.process.LiveActivity;
 import com.example.guans.arrivied.process.ScreenChangeReceiver;
@@ -38,24 +39,26 @@ import static com.amap.api.fence.GeoFenceClient.GEOFENCE_IN;
 import static com.amap.api.fence.GeoFenceClient.GEOFENCE_OUT;
 import static com.amap.api.fence.GeoFenceClient.GEOFENCE_STAYED;
 
-public class GeoFenceService extends Service implements ControllerReceiver.ControlReceiveListener, GeoFenceListener,GeoFenceClientProxy.GenFenceTaskObserver,ScreenChangeReceiver.OnBroadcastReceiveListener {
+public class GeoFenceService extends Service implements ControllerReceiver.ControlReceiveListener, GeoFenceListener, GeoFenceClientProxy.GenFenceTaskObserver, ScreenChangeReceiver.OnBroadcastReceiveListener {
     public static final int ADD_DPOINT = 1;
     //定义接收广播的action字符串
     public static final String GEOFENCE_BROADCAST_ACTION = "com.location.apis.geofencedemo.broadcast";
     public static final String GEOFENCE_CANCLE_ATCITON = "com.example.guans.arrivied.service.GeoFenceService.CANCLE_GEOFENCE";
-    public static final String ADD_DPOINT_ACTION="com.example.guans.arrivied.service.GeoFenceService.ADD_GEOFENCE";
+    public static final String ADD_DPOINT_ACTION = "com.example.guans.arrivied.service.GeoFenceService.ADD_GEOFENCE";
     public static final String ACTION_GEOFENCE_SERVICE_BIND = "com.example.guan.arrived.geofenceservice.SERVICE_BIND";
     public static final String ACTION_GEOFENCE_REMOVED = "com.example.guan.arrived.geofenceservice.GEOREMOVED";
-    public static final int ADD_GEOFENCE_ID=100;
-    public static final int ARRIVED_NOTIFICATION_ID=101;
-    public static final String ADD_GEOFENCE_SUCCESS_ACTION="com.example.guan.arrived.geofenceservice.ADD_GEOFENCE_SUCCESS";
-    public static final String ARRIVED_ACTION="com.example.guan.arrived.geofenceservice.ARRIVED";
-    public static final String WAKE_UP_ACTION="com.example.guan.arrived.geofenceservice.WAKE_UP";
+    public static final int ADD_GEOFENCE_ID = 100;
+    public static final int ARRIVED_NOTIFICATION_ID = 101;
+    public static final String ADD_GEOFENCE_SUCCESS_ACTION = "com.example.guan.arrived.geofenceservice.ADD_GEOFENCE_SUCCESS";
+    public static final String ARRIVED_ACTION = "com.example.guan.arrived.geofenceservice.ARRIVED";
+    public static final String WAKE_UP_ACTION = "com.example.guan.arrived.geofenceservice.WAKE_UP";
+    public static final String ARRIVED_PROXIMITY = "com.example.guans.arrivied.service.GeoFenceService.ARRIVED_PROXIMITY";
+    public static final int PROXIMITY_REQUESTCODE = 1001;
     private GeoFenceClient mGeoFenceClient;
     private BusStationItem stationItem;
     private GeoFenceClientProxy mGeoFenceClientProxy;
     private PowerManager.WakeLock wakeLock;
-    private boolean isWatching=false;
+    private boolean isWatching = false;
     private ScreenChangeReceiver screenChangeReceiver;
     private ControllerReceiver controller;
     private AlarmManager alarmManager;
@@ -63,18 +66,21 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     private Handler handler;
     private ConnectivityManager connectivityManager;
     private LocationManager locationManager;
-
     private WatchItem watchItem;
-    private Runnable tryAddDeoFenceAgainRunnable =new Runnable() {
+    private OfflineLocationClient offlineLocationClient;
+    private Runnable tryAddDeoFenceAgainRunnable = new Runnable() {
         @Override
         public void run() {
             addGeoFence(stationItem);
-            Toast.makeText(getApplicationContext(),"add again",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "add again", Toast.LENGTH_SHORT).show();
         }
     };
+    private PendingIntent alarmPendingIntent;
+    private Intent alarmIntent;
 
     public GeoFenceService() {
     }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -85,19 +91,25 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             mGeoFenceClient.createPendingIntent(GEOFENCE_BROADCAST_ACTION);
             mGeoFenceClient.setGeoFenceListener(this);
         }
-        screenChangeReceiver=new ScreenChangeReceiver(this);
-        controller=new ControllerReceiver(this);
-        IntentFilter controlIntentFilter=new IntentFilter();
+        registerReceivers();
+        alarmIntent = new Intent("com.location.apis.geofencedemo.broadcast");
+        handler = new Handler(getMainLooper());
+        offlineLocationClient = new OfflineLocationClient(this);
+        prepareAliveAction();
+        connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+    }
+
+    private void registerReceivers() {
+        screenChangeReceiver = new ScreenChangeReceiver(this);
+        controller = new ControllerReceiver(this);
+        IntentFilter controlIntentFilter = new IntentFilter();
         controlIntentFilter.addAction(GEOFENCE_CANCLE_ATCITON);
         controlIntentFilter.addAction(WAKE_UP_ACTION);
         controlIntentFilter.addAction(ARRIVED_ACTION);
         controlIntentFilter.addAction(LocationManager.PROVIDERS_CHANGED_ACTION);
         controlIntentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        registerReceiver(controller,controlIntentFilter);
-        handler=new Handler(getMainLooper());
-        prepareAliveAction();
-        connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        registerReceiver(controller, controlIntentFilter);
     }
 
     private void prepareAliveAction() {
@@ -110,7 +122,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-            //先实现单点提醒，后续可以实现多点提醒
+        //先实现单点提醒，后续可以实现多点提醒
         mGeoFenceClient.removeGeoFence();
         addGeoFence(intent);
         startAlarmTask();
@@ -120,30 +132,25 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     /*
      *息屏时保证系统不休眠
      */
-
     private void startAlarmTask() {
 //        if(isWatching){
         alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 5000, 60 * 1000, wakeupPendingIntent);
-        wakeLock.acquire();
+        wakeLock.acquire(3 * 3600 * 1000);
     }
 
     private void startWatchingNotification() {
-        Intent startLaunchActivity=new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent=PendingIntent.getActivity(this,100,startLaunchActivity,PendingIntent.FLAG_UPDATE_CURRENT);
-        Notification notification= null;
-        RemoteViews remoteViews=null;
+        Intent startLaunchActivity = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 100, startLaunchActivity, PendingIntent.FLAG_UPDATE_CURRENT);
+        Notification notification = null;
+        RemoteViews remoteViews;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-               remoteViews=new RemoteViews(getPackageName(),R.layout.watching_notification_view);
-//            }else {
-//                remoteViews=new RemoteViews(getPackageName(),R.layout.watching_notification_view_small);
-//            }
-            Intent cancelIntent=new Intent(GEOFENCE_CANCLE_ATCITON);
-            remoteViews.setOnClickPendingIntent(R.id.cancel_watch,PendingIntent.getBroadcast(getApplicationContext(),0,cancelIntent,PendingIntent.FLAG_UPDATE_CURRENT));
-            remoteViews.setTextViewText(R.id.station_info,"您设置了"+stationItem.getBusStationName());
-            NotificationCompat.Builder notificationBuilder=new NotificationCompat.Builder(this);
+            remoteViews = new RemoteViews(getPackageName(), R.layout.watching_notification_view);
+            Intent cancelIntent = new Intent(GEOFENCE_CANCLE_ATCITON);
+            remoteViews.setOnClickPendingIntent(R.id.cancel_watch, PendingIntent.getBroadcast(getApplicationContext(), 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+            remoteViews.setTextViewText(R.id.station_info, "您设置了" + stationItem.getBusStationName());
+            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
             notificationBuilder.setContentTitle("Arrived")
-                    .setContentText("正在监控"+stationItem.getBusStationName()+"\n"+watchItem.getBusLineItem().getBusLineName())
+                    .setContentText("正在监控" + stationItem.getBusStationName() + "\n" + watchItem.getBusLineItem().getBusLineName())
                     .setSmallIcon(R.drawable.bus_station)
                     .setWhen(System.currentTimeMillis())
                     .setContentIntent(pendingIntent)
@@ -151,24 +158,28 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                     .setOngoing(true)
                     .setCustomBigContentView(remoteViews);
 
-            notification=notificationBuilder.build();
+            notification = notificationBuilder.build();
         }
-        startForeground(ADD_GEOFENCE_ID,notification);
+        startForeground(ADD_GEOFENCE_ID, notification);
     }
 
     private void addGeoFence(Intent intent) {
-        watchItem=intent.getParcelableExtra("TARGET_ITEM");
-        stationItem=watchItem.getBusStationItem();
+        watchItem = intent.getParcelableExtra("TARGET_ITEM");
+        stationItem = watchItem.getBusStationItem();
         mGeoFenceClientProxy.setBusStationItem(stationItem);
         mGeoFenceClientProxy.setWatchItem(watchItem);
         addGeoFence(stationItem);
-        handler.postDelayed(tryAddDeoFenceAgainRunnable,2000);
+        alarmIntent.putExtra("TARGET_ITEM", stationItem);
+        alarmPendingIntent = PendingIntent.getBroadcast(this, PROXIMITY_REQUESTCODE, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        offlineLocationClient.addProximityAlert(stationItem.getLatLonPoint(), 300f, 30 * 1000, alarmPendingIntent);
+        handler.postDelayed(tryAddDeoFenceAgainRunnable, 2000);
     }
-    private void addGeoFence(BusStationItem stationItem){
+
+    private void addGeoFence(BusStationItem stationItem) {
         DPoint dPoint = new DPoint();
         dPoint.setLatitude(stationItem.getLatLonPoint().getLatitude());
         dPoint.setLongitude(stationItem.getLatLonPoint().getLongitude());
-        mGeoFenceClient.addGeoFence(dPoint, 150f, "BUS_STATION");
+        mGeoFenceClient.addGeoFence(dPoint, 300f, "BUS_STATION");
     }
 
     @Override
@@ -184,33 +195,36 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     public void onDestroy() {
         if (!mGeoFenceClient.getAllGeoFence().isEmpty())
             mGeoFenceClient.removeGeoFence();
-        if(screenChangeReceiver!=null){
+        offlineLocationClient.removeProximityAlert(alarmPendingIntent);
+        if (screenChangeReceiver != null) {
             unregisterReceiver(screenChangeReceiver);
         }
         unregisterReceiver(controller);
-        if(wakeLock.isHeld())
+        if (wakeLock.isHeld())
             wakeLock.release();
         LOGUtil.logE(this, "onDestroy");
+        mGeoFenceClient.removeGeoFence();
+        mGeoFenceClient = null;
+        mGeoFenceClientProxy = null;
         super.onDestroy();
     }
 
     @Override
     public void onGeoFenceCreateFinished(List<GeoFence> list, int i, String s) {
         if (i == GeoFence.ADDGEOFENCE_SUCCESS) {//判断围栏是否创建成功
-            Toast.makeText(getApplicationContext(),"围栏创建成功"+s,Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "围栏创建成功" + s, Toast.LENGTH_SHORT).show();
             startWatchingNotification();
             handler.removeCallbacks(tryAddDeoFenceAgainRunnable);
             //发送一个广播通知UI控件更新状态
             //更改该服务到前台通知
             //geoFenceList就是已经添加的围栏列表，可据此查看创建的围栏
             //发送一个添加围栏成功的broadcast，更新ui
-            Intent intent=new Intent(ADD_GEOFENCE_SUCCESS_ACTION);
-//            intent.putExtra("ON_WATCH_STATION",stationItem);
-            intent.putExtra("ON_WATCH_ITEM",watchItem);
+            Intent intent = new Intent(ADD_GEOFENCE_SUCCESS_ACTION);
+            intent.putExtra("ON_WATCH_ITEM", watchItem);
             sendBroadcast(intent);
-            isWatching=true;
+            isWatching = true;
         } else {
-            Toast.makeText(getApplicationContext(),"围栏创建失败"+s,Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "围栏创建失败" + s, Toast.LENGTH_SHORT).show();
             LOGUtil.logE(this, "围栏创建失败" + s);
         }
     }
@@ -223,11 +237,12 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     @Override
     public void onGeoPointRemoved() {
         stopForeground(true);
-        Intent removeGeoFenceIntent=new Intent(ACTION_GEOFENCE_REMOVED);
-        isWatching=false;
+        offlineLocationClient.removeProximityAlert(alarmPendingIntent);
+        Intent removeGeoFenceIntent = new Intent(ACTION_GEOFENCE_REMOVED);
+        isWatching = false;
         alarmManager.cancel(wakeupPendingIntent);
-        if(wakeLock.isHeld()){
-            LOGUtil.logE(this,"releaseLock");
+        if (wakeLock.isHeld()) {
+            LOGUtil.logE(this, "releaseLock");
             wakeLock.release();
         }
         sendBroadcast(removeGeoFenceIntent);
@@ -236,11 +251,11 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
 
     @Override
     public void onBroadcastReceive(Context context, Intent intent) {
-        LOGUtil.logE(this,intent.getAction());
-        if(isWatching){
-            switch (intent.getAction()){
+        LOGUtil.logE(this, intent.getAction());
+        if (isWatching) {
+            switch (intent.getAction()) {
                 case Intent.ACTION_SCREEN_OFF:
-                    Intent startAliveAction=new Intent(this, LiveActivity.class);
+                    Intent startAliveAction = new Intent(this, LiveActivity.class);
                     startActivity(startAliveAction);
                     break;
                 case Intent.ACTION_SCREEN_ON:
@@ -248,40 +263,41 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             }
         }
     }
+
     @Override
     public void onControlBroadcastReceive(Intent intent) {
-        LOGUtil.logE(this,intent.getAction());
-       switch (intent.getAction()){
-           case GEOFENCE_CANCLE_ATCITON:
-              mGeoFenceClientProxy.removeDPoint();
-               if(wakeLock.isHeld())
-               wakeLock.release();
-               stopSelf();
-               break;
-           case WAKE_UP_ACTION:
-               LOGUtil.logE(this,"wakeup");
-               if (!checkNetStatueIsAlive()) {
-                   LOGUtil.logE(this, "net not available");
-               }
-               break;
-           case ARRIVED_ACTION:
-               mGeoFenceClientProxy.removeDPoint();
-               if(wakeLock.isHeld())
-               wakeLock.release();
-               alarmManager.cancel(wakeupPendingIntent);
-               LOGUtil.logE(this,"arrived");
-               stopSelf();
-               break;
-           case ConnectivityManager.CONNECTIVITY_ACTION:
-               NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-               LOGUtil.logE(this, networkInfo.getDetailedState().toString());
-               break;
-           case LocationManager.PROVIDERS_CHANGED_ACTION:
-               if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                   LOGUtil.logE(this, "gps is disable");
-               }
-               break;
-       }
+        LOGUtil.logE(this, intent.getAction());
+        switch (intent.getAction()) {
+            case GEOFENCE_CANCLE_ATCITON:
+                mGeoFenceClientProxy.removeDPoint();
+                if (wakeLock.isHeld())
+                    wakeLock.release();
+                stopSelf();
+                break;
+            case WAKE_UP_ACTION:
+                LOGUtil.logE(this, "wakeup");
+                if (!checkNetStatueIsAlive()) {
+                    LOGUtil.logE(this, "net not available");
+                }
+                break;
+            case ARRIVED_ACTION:
+                mGeoFenceClientProxy.removeDPoint();
+                if (wakeLock.isHeld())
+                    wakeLock.release();
+                alarmManager.cancel(wakeupPendingIntent);
+                LOGUtil.logE(this, "arrived");
+                stopSelf();
+                break;
+            case ConnectivityManager.CONNECTIVITY_ACTION:
+                NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+                LOGUtil.logE(this, networkInfo.getDetailedState().toString());
+                break;
+            case LocationManager.PROVIDERS_CHANGED_ACTION:
+                if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    LOGUtil.logE(this, "gps is disable");
+                }
+                break;
+        }
     }
 
     private boolean checkNetStatueIsAlive() {

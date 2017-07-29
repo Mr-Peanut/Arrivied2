@@ -111,7 +111,7 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
     private void initView(View rootView) {
         busSearchView= rootView.findViewById(R.id.bus_search);
         busSearchView.setSubmitButtonEnabled(true);
-        suggestList = rootView.findViewById(R.id.sugesst_result);
+        suggestList = rootView.findViewById(R.id.suggest_result);
         suggestList.setLayoutManager(new LinearLayoutManager(getContext()));
         suggestAdapter =new BusLineSearchSuggestAdapter(null,getContext());
         suggestList.setAdapter(suggestAdapter);
@@ -148,7 +148,7 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
                 }else {
                     searchTask=new SearchTask(s);
                 }
-                mHandler.postDelayed(searchTask,100);
+                mHandler.postDelayed(searchTask, 300);
                 statueText.setText("搜索建议"+city);
                 return true;
             }
@@ -158,7 +158,7 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
         if(city!=null){
             statueText.setText(city);
         }else {
-            statueText.setText("没有获取城市信息");
+            statueText.setText("没有获取城市信息,请返回重试");
             busSearchView.setClickable(false);
         }
     }
@@ -182,7 +182,7 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
     }
     @Override
     public void onBusLineSearched(BusLineResult busLineResult, int i) {
-        statueText.setText(busLineResult.getQuery().getQueryString());
+        statueText.setText(city + busLineResult.getQuery().getQueryString() + "的搜索结果：");
         LOGUtil.logE(this,"getLines"+String.valueOf(i));
         if(i==1000){
             List<String> suggestKeyWords=busLineResult.getSearchSuggestionKeywords();
