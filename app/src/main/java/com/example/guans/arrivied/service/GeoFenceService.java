@@ -195,7 +195,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     public void onDestroy() {
         if (!mGeoFenceClient.getAllGeoFence().isEmpty())
             mGeoFenceClient.removeGeoFence();
-        offlineLocationClient.removeProximityAlert(alarmPendingIntent);
+        if (alarmPendingIntent != null)
+            offlineLocationClient.removeProximityAlert(alarmPendingIntent);
         if (screenChangeReceiver != null) {
             unregisterReceiver(screenChangeReceiver);
         }
@@ -237,7 +238,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     @Override
     public void onGeoPointRemoved() {
         stopForeground(true);
-        offlineLocationClient.removeProximityAlert(alarmPendingIntent);
+        if (alarmPendingIntent != null)
+            offlineLocationClient.removeProximityAlert(alarmPendingIntent);
         Intent removeGeoFenceIntent = new Intent(ACTION_GEOFENCE_REMOVED);
         isWatching = false;
         alarmManager.cancel(wakeupPendingIntent);

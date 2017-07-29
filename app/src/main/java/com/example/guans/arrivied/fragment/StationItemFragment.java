@@ -14,7 +14,7 @@ import com.amap.api.services.busline.BusLineItem;
 import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.adapter.LineAdapter;
-import com.example.guans.arrivied.util.LOGUtil;
+import com.example.guans.arrivied.view.ItemDivider;
 
 public class StationItemFragment extends Fragment implements LineAdapter.OnStationItemClickListener {
     private static final String ARG_PARAM1 = "param1";
@@ -58,6 +58,7 @@ public class StationItemFragment extends Fragment implements LineAdapter.OnStati
         stationList=view.findViewById(R.id.stationList);
         stationList.setLayoutManager(new LinearLayoutManager(getContext()));
         stationList.setAdapter(lineAdapter);
+        stationList.addItemDecoration(new ItemDivider());
         return view;
     }
 
