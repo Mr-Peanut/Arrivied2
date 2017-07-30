@@ -1,6 +1,9 @@
 package com.example.guans.arrivied.fragment;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -19,6 +22,7 @@ import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.adapter.StationRecordAdapter;
 import com.example.guans.arrivied.bean.StationRecordItem;
 import com.example.guans.arrivied.bean.WatchItem;
+import com.example.guans.arrivied.database.StationsRecordHelper;
 import com.example.guans.arrivied.view.ItemDivider;
 
 public class StationRecordFragment extends Fragment implements StationRecordAdapter.RecordClickedListener, BusLineSearch.OnBusLineSearchListener {
@@ -29,6 +33,7 @@ public class StationRecordFragment extends Fragment implements StationRecordAdap
     private TextView recordStatue;
     private RecyclerView recordList;
     private StationRecordAdapter recordAdapter;
+    private RecordUpdateReceiver recordUpdateReceiver;
 
     public StationRecordFragment() {
         // Required empty public constructor
@@ -46,6 +51,9 @@ public class StationRecordFragment extends Fragment implements StationRecordAdap
         super.onCreate(savedInstanceState);
         recordAdapter = new StationRecordAdapter(getContext());
         recordAdapter.setRecordClickedListener(this);
+        recordUpdateReceiver = new RecordUpdateReceiver();
+        IntentFilter intentFilter = new IntentFilter(StationsRecordHelper.RECORD_UPDATED_ACTION);
+        getActivity().registerReceiver(recordUpdateReceiver, intentFilter);
     }
 
     @Override
@@ -66,6 +74,9 @@ public class StationRecordFragment extends Fragment implements StationRecordAdap
     @Override
     public void onDestroy() {
         recordAdapter.closeCursor();
+        if (recordUpdateReceiver != null) {
+            getActivity().unregisterReceiver(recordUpdateReceiver);
+        }
         super.onDestroy();
     }
 
@@ -150,5 +161,17 @@ public class StationRecordFragment extends Fragment implements StationRecordAdap
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
         void onRecordItemSelected(WatchItem watchItem);
+    }
+
+    class RecordUpdateReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case StationsRecordHelper.RECORD_UPDATED_ACTION:
+                    recordAdapter.flushData();
+                    break;
+            }
+        }
     }
 }

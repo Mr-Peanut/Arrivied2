@@ -2,6 +2,7 @@ package com.example.guans.arrivied.database;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -23,9 +24,12 @@ public class StationsRecordHelper extends SQLiteOpenHelper {
     public static final String STATION_LINE_NAME = "STATION_LINE_NAME";
     public static final String CITY_CODE = "CITY_CODE";
     public static final String DATABASE_NAME = "HISTORY_RECORD";
+    public static final String RECORD_UPDATED_ACTION = "com.example.guans.arrivied.database.StationsRecordHelper.RECORD_UPDATE";
+    private Context context;
 
     public StationsRecordHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
+        this.context = context;
     }
 
     @Override
@@ -55,9 +59,10 @@ public class StationsRecordHelper extends SQLiteOpenHelper {
             contentValues.put(STATION_ID, busStationItem.getBusStationId());
             contentValues.put(STATION_NAME, busStationItem.getBusStationName());
             contentValues.put(STATION_LINE_ID, busLineItem.getBusLineId());
-            contentValues.put(STATION_LINE_NAME, busLineItem.getBusLineId());
+            contentValues.put(STATION_LINE_NAME, busLineItem.getBusLineName());
             contentValues.put(CITY_CODE, busStationItem.getCityCode());
             database.insert(STATIONS_RECORD_TABLE_NAME, null, contentValues);
+            context.sendBroadcast(new Intent(RECORD_UPDATED_ACTION));
         }
         cursor.close();
         database.close();
