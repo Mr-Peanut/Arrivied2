@@ -24,24 +24,12 @@ import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.adapter.BusLineSearchSuggestAdapter;
 import com.example.guans.arrivied.adapter.BusLinesAdapter;
 import com.example.guans.arrivied.util.LOGUtil;
+import com.example.guans.arrivied.view.ItemDivider;
 
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link BusSearchFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link BusSearchFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLineSearchListener,BusLinesAdapter.OnLineItemClickListener{
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    private String mParam1;
-    private String mParam2;
+
 
     private OnFragmentInteractionListener mListener;
     private BusStationQuery busStationQuery;
@@ -56,14 +44,14 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
     private BusLineSearchSuggestAdapter suggestAdapter;
     private BusLinesAdapter busLinesAdapter;
     private SearchTask searchTask;
+    private ItemDivider itemDivider;
     private Handler mHandler;
     public BusSearchFragment() {
     }
-    public static BusSearchFragment newInstance(String param1, String param2) {
+
+    public static BusSearchFragment newInstance() {
         BusSearchFragment fragment = new BusSearchFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -73,10 +61,6 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
         super.onCreate(savedInstanceState);
         initData();
         mHandler=new Handler(getActivity().getMainLooper());
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -109,17 +93,20 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
         mListener = null;
     }
     private void initView(View rootView) {
+        itemDivider = new ItemDivider();
         busSearchView= rootView.findViewById(R.id.bus_search);
         busSearchView.setSubmitButtonEnabled(true);
         suggestList = rootView.findViewById(R.id.suggest_result);
         suggestList.setLayoutManager(new LinearLayoutManager(getContext()));
         suggestAdapter =new BusLineSearchSuggestAdapter(null,getContext());
+        suggestList.addItemDecoration(itemDivider);
         suggestList.setAdapter(suggestAdapter);
         result_list= rootView. findViewById(R.id.search_result_list);
         result_list.setLayoutManager(new LinearLayoutManager(getContext()));
         busLinesAdapter=new BusLinesAdapter(null,getContext());
         busLinesAdapter.setLineItemClickListener(this);
         result_list.setAdapter(busLinesAdapter);
+        result_list.addItemDecoration(itemDivider);
         busSearchView.setOnSearchClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

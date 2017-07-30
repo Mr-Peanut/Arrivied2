@@ -33,8 +33,8 @@ public class ItemDivider extends RecyclerView.ItemDecoration {
         for (int i = 0; i < parent.getChildCount(); i++) {
             View child = parent.getChildAt(i);
             RecyclerView.LayoutParams childParams = (RecyclerView.LayoutParams) child.getLayoutParams();
-            int top = child.getBottom() + childParams.getMarginEnd();
-            colorDrawable.setBounds(parent.getPaddingLeft(), top, parent.getWidth() - parent.getPaddingRight(), top + 1);
+            int top = child.getBottom();
+            colorDrawable.setBounds(parent.getPaddingLeft() + childParams.getMarginStart(), top, parent.getWidth() - parent.getPaddingRight() - childParams.getMarginEnd(), top + 1);
             colorDrawable.draw(c);
 //            c.drawRect(parent.getPaddingLeft(),top,parent.getWidth()-parent.getPaddingRight(),top+1,paint);
         }

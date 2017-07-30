@@ -26,16 +26,10 @@ import com.amap.api.services.core.LatLonPoint;
 import com.example.guans.arrivied.R;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 
 public class MapFragment extends Fragment implements AMap.OnMarkerClickListener {
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    private String mParam1;
-    private String mParam2;
     private AMap aMap;
     private MapView mapView;
     private Marker mMarker;
@@ -53,11 +47,9 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
     public MapFragment() {
     }
 
-    public static MapFragment newInstance(String param1, String param2) {
+    public static MapFragment newInstance() {
         MapFragment fragment = new MapFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -66,10 +58,8 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            busLineItem = getArguments().getParcelable("LINE_ITEM");
         }
-        busLineItem=getArguments().getParcelable("LINE_ITEM");
         markers=new ArrayList<>();
     }
 

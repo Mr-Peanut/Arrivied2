@@ -6,11 +6,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.TextView;
@@ -24,15 +24,15 @@ import com.example.guans.arrivied.bean.LocationClient;
 import com.example.guans.arrivied.bean.WatchItem;
 import com.example.guans.arrivied.fragment.SearchResultFragment;
 import com.example.guans.arrivied.fragment.WatchingInfoFragment;
+import com.example.guans.arrivied.receiver.ControllerReceiver;
 import com.example.guans.arrivied.service.GeoFenceService;
 import com.example.guans.arrivied.service.LocateService;
-import com.example.guans.arrivied.receiver.ControllerReceiver;
-import com.example.guans.arrivied.util.LOGUtil;
-
-import static com.example.guans.arrivied.view.MapActivity.SHOW_STATION_ITEM_ACTION;
 
 
 public class MainActivity extends AppCompatActivity implements ControllerReceiver.ControlReceiveListener,WatchingInfoFragment.OnFragmentInteractionListener,SearchResultFragment.OnFragmentInteractionListener {
+    public static final int BUS_STATION_SEARCH_RESULT_CODE = 1;
+    private static final String WATCH_INFO_FRAGMENT_TAG = "WATCH_INFO";
+    private static final String SEARCH_RESULT_TAG = "SEARCH_RESULT";
     private ControllerReceiver receiver;
     private LocationClient locationClient;
     private ServiceConnection locationServiceConnection;
@@ -46,9 +46,6 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
     private BusStationItem onWatchStation;
     private FragmentManager fragmentManager;
     private WatchingInfoFragment watchingInfoFragment;
-    public static final int BUS_STATION_SEARCH_RESULT_CODE=1;
-    private static final String WATCH_INFO_FRAGMENT_TAG="WATCH_INFO";
-    private static final String SEARCH_RESULT_TAG="SEARCH_RESULT";
     private BusLineItem targetLineItem;
     private SearchResultFragment searchResultFragment;
     private WatchItem targetItem;
@@ -91,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
 //           }
 //       });
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        if (getSupportActionBar() != null)
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         busSearch = (TextView) findViewById(R.id.bus_search);
         locationCity= (TextView) findViewById(R.id.locationCity);
@@ -132,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
                 fragmentManager.beginTransaction().show(watchingInfoFragment).commit();
                 watchingInfoFragment.flush();
             } else {
-                watchingInfoFragment = WatchingInfoFragment.newInstance(null, null);
+                watchingInfoFragment = WatchingInfoFragment.newInstance();
                 fragmentManager.beginTransaction().add(R.id.taskStatue, watchingInfoFragment, WATCH_INFO_FRAGMENT_TAG).commit();
 //                watchingInfoFragment.getArguments().putParcelable("STATION_ITEM", onWatchStation);
                 watchingInfoFragment.getArguments().putParcelable("ON_WATCH_ITEM", onWatchItem);
@@ -159,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
                 fragmentManager.beginTransaction().show(searchResultFragment).commit();
                 searchResultFragment.flush();
             } else {
-                searchResultFragment = SearchResultFragment.newInstance(null, null);
+                searchResultFragment = SearchResultFragment.newInstance();
                 fragmentManager.beginTransaction().add(R.id.taskStatue, searchResultFragment, SEARCH_RESULT_TAG).commit();
 //                searchResultFragment.getArguments().putParcelable("STATION_ITEM", targetStationItem);
 //                searchResultFragment.getArguments().putParcelable("LINE_ITEM",targetLineItem);

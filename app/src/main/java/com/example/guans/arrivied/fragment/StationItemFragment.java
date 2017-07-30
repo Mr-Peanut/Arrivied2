@@ -17,24 +17,18 @@ import com.example.guans.arrivied.adapter.LineAdapter;
 import com.example.guans.arrivied.view.ItemDivider;
 
 public class StationItemFragment extends Fragment implements LineAdapter.OnStationItemClickListener {
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
     private BusLineItem busLineItem;
     private RecyclerView stationList;
     private LineAdapter lineAdapter;
-
-    private String mParam1;
-    private String mParam2;
 
     private OnFragmentInteractionListener mListener;
 
     public StationItemFragment() {
     }
-    public static StationItemFragment newInstance(String param1, String param2) {
+
+    public static StationItemFragment newInstance() {
         StationItemFragment fragment = new StationItemFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -43,10 +37,9 @@ public class StationItemFragment extends Fragment implements LineAdapter.OnStati
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            busLineItem = getArguments().getParcelable("LINE_ITEM");
         }
-        busLineItem=getArguments().getParcelable("LINE_ITEM");
+
         lineAdapter=new LineAdapter(getActivity(),busLineItem);
         lineAdapter.setStationItemClickListener(this);
     }

@@ -108,7 +108,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         controlIntentFilter.addAction(WAKE_UP_ACTION);
         controlIntentFilter.addAction(ARRIVED_ACTION);
         controlIntentFilter.addAction(LocationManager.PROVIDERS_CHANGED_ACTION);
-        controlIntentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+//        controlIntentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(controller, controlIntentFilter);
     }
 
@@ -292,11 +292,13 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                 break;
             case ConnectivityManager.CONNECTIVITY_ACTION:
                 NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-                LOGUtil.logE(this, networkInfo.getDetailedState().toString());
+                if (networkInfo != null) {
+                    Toast.makeText(this, networkInfo.getDetailedState().toString(), Toast.LENGTH_SHORT).show();
+                }
                 break;
             case LocationManager.PROVIDERS_CHANGED_ACTION:
                 if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                    LOGUtil.logE(this, "gps is disable");
+                    Toast.makeText(this, "GPS 不可用，可能会影响定位精度", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }

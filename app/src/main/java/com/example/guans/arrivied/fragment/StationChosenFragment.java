@@ -7,8 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -93,7 +91,7 @@ public class StationChosenFragment extends Fragment implements LineAdapter.OnSta
                         break;
                     case R.id.show_in_map:
                         if(mapFragment==null){
-                            mapFragment=MapFragment.newInstance("BUS_LINE_ITEM","MAP_FRAGMENT");
+                            mapFragment = MapFragment.newInstance();
                             LOGUtil.logE(this,"putLine"+busLineItem.getBusLineName());
                             mapFragment.getArguments().putParcelable("LINE_ITEM",busLineItem);
                             fragmentManager.beginTransaction().add(R.id.line_item_window,mapFragment,"MAP_FRAGMENT").commit();
@@ -109,7 +107,7 @@ public class StationChosenFragment extends Fragment implements LineAdapter.OnSta
     }
     private void initStationFragment() {
         if(stationItemFragment==null){
-            stationItemFragment=StationItemFragment.newInstance("BUS_LINE_ITEM","STATION_ITEM_FRAGMENT");
+            stationItemFragment = StationItemFragment.newInstance();
             stationItemFragment.getArguments().putParcelable("LINE_ITEM",busLineItem);
             fragmentManager.beginTransaction().add(R.id.line_item_window,stationItemFragment,"STATION_ITEM_FRAGMENT").commit();
         }

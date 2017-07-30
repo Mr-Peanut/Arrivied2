@@ -16,11 +16,6 @@ import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.bean.WatchItem;
 
 public class SearchResultFragment extends Fragment {
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    private String mParam1;
-    private String mParam2;
     private BusStationItem targetStation;
     private BusLineItem targetLine;
     private TextView targetStationName;
@@ -32,11 +27,10 @@ public class SearchResultFragment extends Fragment {
 
     public SearchResultFragment() {
     }
-    public static SearchResultFragment newInstance(String param1, String param2) {
+
+    public static SearchResultFragment newInstance() {
         SearchResultFragment fragment = new SearchResultFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -45,12 +39,11 @@ public class SearchResultFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            targetItem = getArguments().getParcelable("WATCH_ITEM");
+
         }
 //        targetStation=getArguments().getParcelable("STATION_ITEM");
 //        targetLine=getArguments().getParcelable("LINE_ITEM");
-        targetItem=getArguments().getParcelable("WATCH_ITEM");
     }
 
     @Override
@@ -92,7 +85,7 @@ public class SearchResultFragment extends Fragment {
 //        targetStation=getArguments().getParcelable("STATION_ITEM");
 //        targetLine=getArguments().getParcelable("LINE_ITEM");
       targetItem=getArguments().getParcelable("WATCH_ITEM");
-      targetStationName.setText(targetItem.getBusStationItem().getBusStationName());
+      targetStationName.setText(targetItem != null ? targetItem.getBusStationItem().getBusStationName() : null);
       targetLineName.setText(targetItem.getBusLineItem().getBusLineName());
     }
 

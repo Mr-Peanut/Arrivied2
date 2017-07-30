@@ -2,10 +2,9 @@ package com.example.guans.arrivied.view;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.widget.FrameLayout;
 
 import com.amap.api.services.busline.BusLineItem;
 import com.amap.api.services.busline.BusStationItem;
@@ -27,7 +26,7 @@ public class SearchActivity extends AppCompatActivity implements BusSearchFragme
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
         fragmentManager=getSupportFragmentManager();
-        busSearchFragment=BusSearchFragment.newInstance("one","two");
+        busSearchFragment = BusSearchFragment.newInstance();
         fragmentManager.beginTransaction()
                 .add(R.id.container,busSearchFragment,"searchFragment").commit();
 //                replace(R.id.container,busSearchFragment).commit();
