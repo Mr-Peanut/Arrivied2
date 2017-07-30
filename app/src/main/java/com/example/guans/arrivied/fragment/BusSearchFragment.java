@@ -176,7 +176,6 @@ public class BusSearchFragment extends Fragment implements BusLineSearch.OnBusLi
             //没有获取正确的线路线索（关键字输入有误）
             if (suggestKeyWords!=null&&suggestKeyWords.size()!=0){
                 suggestAdapter.setSugessutList(suggestKeyWords);
-                LOGUtil.logE(suggestAdapter,String.valueOf(suggestKeyWords.size()));
             }else {
                 if(busLineResult.getBusLines().size()==0){
                     statueText.setText("没有搜索结果");

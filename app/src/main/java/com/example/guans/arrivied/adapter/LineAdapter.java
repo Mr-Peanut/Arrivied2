@@ -18,18 +18,7 @@ import com.example.guans.arrivied.R;
 
 public class LineAdapter extends RecyclerView.Adapter <LineAdapter.StationItemHolder>{
     private Context mContext;
-
-    public void setBusLineItem(BusLineItem busLineItem) {
-        this.busLineItem = busLineItem;
-        notifyDataSetChanged();
-    }
-
     private BusLineItem busLineItem;
-
-    public void setStationItemClickListener(OnStationItemClickListener staionItemClickListener) {
-        this.stationItemClickListener = staionItemClickListener;
-    }
-
     private OnStationItemClickListener stationItemClickListener;
 
     public LineAdapter(Context mContext, BusLineItem busLineItem) {
@@ -37,9 +26,18 @@ public class LineAdapter extends RecyclerView.Adapter <LineAdapter.StationItemHo
         this.busLineItem = busLineItem;
     }
 
+    public void setBusLineItem(BusLineItem busLineItem) {
+        this.busLineItem = busLineItem;
+        notifyDataSetChanged();
+    }
+
+    public void setStationItemClickListener(OnStationItemClickListener staionItemClickListener) {
+        this.stationItemClickListener = staionItemClickListener;
+    }
+
     @Override
     public StationItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view= LayoutInflater.from(mContext).inflate(R.layout.text_item_layout,null);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.text_item_layout, parent, false);
         final StationItemHolder stationItemHolder=new StationItemHolder(view);
         view.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,6 +60,10 @@ public class LineAdapter extends RecyclerView.Adapter <LineAdapter.StationItemHo
         return 0;
     }
 
+    public interface OnStationItemClickListener {
+        void onStationItemClick(BusStationItem busStationItem);
+    }
+
     class StationItemHolder extends RecyclerView.ViewHolder{
         LinearLayout itemRootView;
         TextView itemView;
@@ -70,8 +72,5 @@ public class LineAdapter extends RecyclerView.Adapter <LineAdapter.StationItemHo
             itemRootView=view.findViewById(R.id.text_item_root);
             itemView=view.findViewById(R.id.text_item);
         }
-    }
-    public interface OnStationItemClickListener {
-        void onStationItemClick(BusStationItem busStationItem);
     }
 }

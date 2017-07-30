@@ -25,7 +25,7 @@
                 android:gravity="center"
                 android:paddingEnd="2dp"
                 android:paddingStart="2dp"
-                android:text="@string/hello_blank_fragment" />
+                android:text="@string/record_fragment_name" />
             <RadioGroup
                 android:id="@+id/show_style_choose"
                 android:layout_width="wrap_content"
@@ -40,12 +40,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:text="列表显示" />
+                    android:text="@string/show_in_list" />
                 <RadioButton
                     android:id="@+id/show_in_map"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="地图显示" />
+                    android:text="@string/show_on_map" />
             </RadioGroup>
         </LinearLayout>
 

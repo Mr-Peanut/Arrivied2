@@ -3,13 +3,8 @@
     android:shape="rectangle">
     <corners android:radius="10dp"/>
     <padding android:bottom="5dp"
-        android:top="5dp"
         android:left="8dp"
-        android:right="8dp"/>
-    <solid android:color="#FFFFEE"/>
-    <gradient
-        android:startColor="#FFFFEE"
-        android:endColor="#FFFFEE"
-        android:type="linear"
-       />
+        android:right="8dp"
+        android:top="5dp" />
+    <solid android:color="#FFFFFF" />
 </shape>

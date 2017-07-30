@@ -5,7 +5,7 @@
     <string name="target_station">您选取了：</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="record_fragment_name">历史记录：</string>
     <string name="notification_tittle">您设置了##站/n距离还有x米</string>
     <string name="notification_cancle">取消提醒</string>
 
@@ -26,4 +26,6 @@
     <string name="target_info">目标站点：</string>
     <string name="arrived_notification_content">您已到站，请准备下车，点击或滑动取消提醒</string>
     <string name="query_hint">请输入线路编号</string>
+    <string name="show_on_map">地图显示</string>
+    <string name="show_in_list">列表显示</string>
 </resources>
