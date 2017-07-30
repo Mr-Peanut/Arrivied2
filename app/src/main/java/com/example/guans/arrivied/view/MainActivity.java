@@ -23,16 +23,18 @@ import com.example.guans.arrivied.bean.GeoFenceClientProxy;
 import com.example.guans.arrivied.bean.LocationClient;
 import com.example.guans.arrivied.bean.WatchItem;
 import com.example.guans.arrivied.fragment.SearchResultFragment;
+import com.example.guans.arrivied.fragment.StationRecordFragment;
 import com.example.guans.arrivied.fragment.WatchingInfoFragment;
 import com.example.guans.arrivied.receiver.ControllerReceiver;
 import com.example.guans.arrivied.service.GeoFenceService;
 import com.example.guans.arrivied.service.LocateService;
 
 
-public class MainActivity extends AppCompatActivity implements ControllerReceiver.ControlReceiveListener,WatchingInfoFragment.OnFragmentInteractionListener,SearchResultFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements ControllerReceiver.ControlReceiveListener, WatchingInfoFragment.OnFragmentInteractionListener, SearchResultFragment.OnFragmentInteractionListener, StationRecordFragment.OnFragmentInteractionListener {
     public static final int BUS_STATION_SEARCH_RESULT_CODE = 1;
     private static final String WATCH_INFO_FRAGMENT_TAG = "WATCH_INFO";
     private static final String SEARCH_RESULT_TAG = "SEARCH_RESULT";
+    private static final String RECORD_FRAGMENT_TAG = "RECORD_FRAGMENT";
     private ControllerReceiver receiver;
     private LocationClient locationClient;
     private ServiceConnection locationServiceConnection;
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
     private WatchItem targetItem;
     private WatchItem onWatchItem;
     private TextView busSearch;
+    private StationRecordFragment stationRecordFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
             };
         fragmentManager=getSupportFragmentManager();
         initView();
+        showRecordFragment(savedInstanceState);
         initReceiver();
         bindLocationService();
         bindGeoFenceService();
@@ -108,8 +112,25 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
                 startActivityForResult(stationSearchIntent,BUS_STATION_SEARCH_RESULT_CODE);
             }
         });
+
     }
 
+    private void showRecordFragment(Bundle savedInstanceState) {
+
+        if (stationRecordFragment == null) {
+            if (savedInstanceState != null) {
+                fragmentManager.getFragment(savedInstanceState, RECORD_FRAGMENT_TAG);
+            }
+            if (stationRecordFragment == null) {
+                fragmentManager.findFragmentByTag(RECORD_FRAGMENT_TAG);
+            }
+            if (stationRecordFragment == null) {
+                stationRecordFragment = StationRecordFragment.newInstance();
+                fragmentManager.beginTransaction().add(R.id.record, stationRecordFragment, RECORD_FRAGMENT_TAG).commit();
+            }
+            fragmentManager.beginTransaction().show(stationRecordFragment).commit();
+        }
+    }
     private void bindLocationService() {
         Intent locationIntent = new Intent(this, LocateService.class);
         locationIntent.setAction(LocateService.ACTION_LOCATION_BIND);
@@ -125,14 +146,12 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         } else {
             watchingInfoFragment = (WatchingInfoFragment) fragmentManager.findFragmentByTag(WATCH_INFO_FRAGMENT_TAG);
             if (watchingInfoFragment != null) {
-//                watchingInfoFragment.getArguments().putParcelable("STATION_ITEM", onWatchStation);
                 watchingInfoFragment.getArguments().putParcelable("ON_WATCH_ITEM", onWatchItem);
                 fragmentManager.beginTransaction().show(watchingInfoFragment).commit();
                 watchingInfoFragment.flush();
             } else {
                 watchingInfoFragment = WatchingInfoFragment.newInstance();
                 fragmentManager.beginTransaction().add(R.id.taskStatue, watchingInfoFragment, WATCH_INFO_FRAGMENT_TAG).commit();
-//                watchingInfoFragment.getArguments().putParcelable("STATION_ITEM", onWatchStation);
                 watchingInfoFragment.getArguments().putParcelable("ON_WATCH_ITEM", onWatchItem);
                 fragmentManager.beginTransaction().show(watchingInfoFragment).commit();
             }
@@ -143,24 +162,18 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
     }
     private void showSearchResult(){
         if (searchResultFragment!= null) {
-//            searchResultFragment.getArguments().putParcelable("STATION_ITEM", targetStationItem);
-//            searchResultFragment.getArguments().putParcelable("LINE_ITEM",targetLineItem);
             searchResultFragment.getArguments().putParcelable("WATCH_ITEM",targetItem);
             fragmentManager.beginTransaction().show(searchResultFragment).commit();
             searchResultFragment.flush();
         } else {
             searchResultFragment = (SearchResultFragment) fragmentManager.findFragmentByTag(SEARCH_RESULT_TAG);
             if (searchResultFragment!= null) {
-//                searchResultFragment.getArguments().putParcelable("STATION_ITEM", targetStationItem);
-//                searchResultFragment.getArguments().putParcelable("LINE_ITEM",targetLineItem);
                 searchResultFragment.getArguments().putParcelable("WATCH_ITEM",targetItem);
                 fragmentManager.beginTransaction().show(searchResultFragment).commit();
                 searchResultFragment.flush();
             } else {
                 searchResultFragment = SearchResultFragment.newInstance();
                 fragmentManager.beginTransaction().add(R.id.taskStatue, searchResultFragment, SEARCH_RESULT_TAG).commit();
-//                searchResultFragment.getArguments().putParcelable("STATION_ITEM", targetStationItem);
-//                searchResultFragment.getArguments().putParcelable("LINE_ITEM",targetLineItem);
                 searchResultFragment.getArguments().putParcelable("WATCH_ITEM",targetItem);
                 fragmentManager.beginTransaction().show(searchResultFragment).commit();
             }
@@ -168,6 +181,9 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         if(watchingInfoFragment!=null){
             fragmentManager.beginTransaction().hide(watchingInfoFragment).commit();
         }
+//        if(stationRecordFragment!=null){
+//            fragmentManager.beginTransaction().hide(stationRecordFragment).commit();
+//        }
     }
 
     private void initReceiver() {
@@ -193,7 +209,6 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
                             }
                 break;
             case GeoFenceService.ADD_GEOFENCE_SUCCESS_ACTION:
-//                onWatchStation=intent.getParcelableExtra("ON_WATCH_STATION");
                 onWatchItem=intent.getParcelableExtra("ON_WATCH_ITEM");
                 showWatchInfoFragment();
                 break;
@@ -229,8 +244,6 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
             case BUS_STATION_SEARCH_RESULT_CODE:
                 if(resultCode==RESULT_OK){
                     targetItem=data.getParcelableExtra("TARGET_ITEM");
-//                    targetStationItem=data.getParcelableExtra("STATION_ITEM") ;
-//                    targetLineItem=data.getParcelableExtra("LINE_ITEM");
                    showSearchResult();
                 }
                 break;
@@ -244,11 +257,16 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
     }
 
     @Override
+    public void onRecordItemSelected(WatchItem watchItem) {
+        targetItem = watchItem;
+        showSearchResult();
+    }
+
+    @Override
     public void OnStartWatchClicked(WatchItem targetItem) {
         Intent watchIntent=new Intent(MainActivity.this, GeoFenceService.class);
         watchIntent.setAction("com.example.guans.arrivied.service.GeoFenceService.ADD_GEOFENCE");
         watchIntent.putExtra("TARGET_ITEM",targetItem);
-//        watchIntent.putExtra("STATION_ITEM",targetStation);
         startService(watchIntent);
 
     }
@@ -278,7 +296,6 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             geoFenceClientProxy= (GeoFenceClientProxy) iBinder;
             if(geoFenceClientProxy!=null&&geoFenceClientProxy.getGeoFences()!=null&&geoFenceClientProxy.getGeoFences().size()!=0){
-//                onWatchStation=geoFenceClientProxy.getBusStationItem();
                 onWatchItem=geoFenceClientProxy.getWatchItem();
                 showWatchInfoFragment();
             }

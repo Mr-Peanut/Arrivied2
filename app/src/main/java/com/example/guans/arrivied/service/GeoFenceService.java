@@ -27,6 +27,7 @@ import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.bean.GeoFenceClientProxy;
 import com.example.guans.arrivied.bean.OfflineLocationClient;
 import com.example.guans.arrivied.bean.WatchItem;
+import com.example.guans.arrivied.database.StationsRecordHelper;
 import com.example.guans.arrivied.process.LiveActivity;
 import com.example.guans.arrivied.process.ScreenChangeReceiver;
 import com.example.guans.arrivied.receiver.ControllerReceiver;
@@ -53,7 +54,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     public static final String ARRIVED_ACTION = "com.example.guan.arrived.geofenceservice.ARRIVED";
     public static final String WAKE_UP_ACTION = "com.example.guan.arrived.geofenceservice.WAKE_UP";
     public static final String ARRIVED_PROXIMITY = "com.example.guans.arrivied.service.GeoFenceService.ARRIVED_PROXIMITY";
-    public static final int PROXIMITY_REQUESTCODE = 1001;
+    public static final int PROXIMITY_REQUEST_CODE = 1001;
+    private StationsRecordHelper stationsRecordHelper;
     private GeoFenceClient mGeoFenceClient;
     private BusStationItem stationItem;
     private GeoFenceClientProxy mGeoFenceClientProxy;
@@ -98,6 +100,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         prepareAliveAction();
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        stationsRecordHelper = new StationsRecordHelper(this.getApplicationContext(), StationsRecordHelper.DATABASE_NAME, null, 1);
     }
 
     private void registerReceivers() {
@@ -170,7 +173,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         mGeoFenceClientProxy.setWatchItem(watchItem);
         addGeoFence(stationItem);
         alarmIntent.putExtra("TARGET_ITEM", stationItem);
-        alarmPendingIntent = PendingIntent.getBroadcast(this, PROXIMITY_REQUESTCODE, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmPendingIntent = PendingIntent.getBroadcast(this, PROXIMITY_REQUEST_CODE, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         offlineLocationClient.addProximityAlert(stationItem.getLatLonPoint(), 300f, 30 * 1000, alarmPendingIntent);
         handler.postDelayed(tryAddDeoFenceAgainRunnable, 2000);
     }
@@ -216,6 +219,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             Toast.makeText(getApplicationContext(), "围栏创建成功" + s, Toast.LENGTH_SHORT).show();
             startWatchingNotification();
             handler.removeCallbacks(tryAddDeoFenceAgainRunnable);
+            stationsRecordHelper.insertData(watchItem);
             //发送一个广播通知UI控件更新状态
             //更改该服务到前台通知
             //geoFenceList就是已经添加的围栏列表，可据此查看创建的围栏

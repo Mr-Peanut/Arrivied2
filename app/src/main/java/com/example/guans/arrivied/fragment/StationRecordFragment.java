@@ -4,9 +4,11 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.amap.api.services.busline.BusLineItem;
 import com.amap.api.services.busline.BusLineQuery;
@@ -17,12 +19,16 @@ import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.adapter.StationRecordAdapter;
 import com.example.guans.arrivied.bean.StationRecordItem;
 import com.example.guans.arrivied.bean.WatchItem;
+import com.example.guans.arrivied.view.ItemDivider;
 
 public class StationRecordFragment extends Fragment implements StationRecordAdapter.RecordClickedListener, BusLineSearch.OnBusLineSearchListener {
     private OnFragmentInteractionListener mListener;
     private BusLineSearch busLineSearch;
     private BusLineQuery busLineQuery;
     private StationRecordItem selectStationRecordItem;
+    private TextView recordStatue;
+    private RecyclerView recordList;
+    private StationRecordAdapter recordAdapter;
 
     public StationRecordFragment() {
         // Required empty public constructor
@@ -38,15 +44,29 @@ public class StationRecordFragment extends Fragment implements StationRecordAdap
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-        }
+        recordAdapter = new StationRecordAdapter(getContext());
+        recordAdapter.setRecordClickedListener(this);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_station_record, container, false);
+        View view = inflater.inflate(R.layout.fragment_station_record, container, false);
+        recordStatue = view.findViewById(R.id.record_statue);
+        recordList = view.findViewById(R.id.record_list);
+        recordList.setAdapter(recordAdapter);
+        recordList.addItemDecoration(new ItemDivider());
+        return view;
+    }
+
+    public void flush() {
+        recordAdapter.flushData();
+    }
+
+    @Override
+    public void onDestroy() {
+        recordAdapter.closeCursor();
+        super.onDestroy();
     }
 
     public void onButtonPressed(Uri uri) {
@@ -129,7 +149,6 @@ public class StationRecordFragment extends Fragment implements StationRecordAdap
 
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
-
         void onRecordItemSelected(WatchItem watchItem);
     }
 }
