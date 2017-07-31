@@ -96,5 +96,9 @@ public class SearchResultFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
         void OnStartWatchClicked(WatchItem targetStation);
+
+        void showProgressBar();
+
+        void dismissProgressBar();
     }
 }

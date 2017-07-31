@@ -126,6 +126,7 @@ public class StationRecordFragment extends Fragment implements StationRecordAdap
 
     @Override
     public void OnRecordClicked(StationRecordItem stationRecordItem) {
+        mListener.showProgressBar();
         selectStationRecordItem = stationRecordItem;
         if (busLineQuery == null) {
             busLineQuery = new BusLineQuery(stationRecordItem.getLineID(), BusLineQuery.SearchType.BY_LINE_ID, stationRecordItem.getCityCode());
@@ -169,6 +170,7 @@ public class StationRecordFragment extends Fragment implements StationRecordAdap
             showError();
         }
         selectStationRecordItem = null;
+        mListener.dismissProgressBar();
     }
 
     private void showError() {
@@ -188,6 +190,10 @@ public class StationRecordFragment extends Fragment implements StationRecordAdap
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
         void onRecordItemSelected(WatchItem watchItem);
+
+        void showProgressBar();
+
+        void dismissProgressBar();
     }
 
     class RecordUpdateReceiver extends BroadcastReceiver {

@@ -53,6 +53,9 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
     private WatchItem targetItem;
     private WatchItem onWatchItem;
     private TextView busSearch;
+    private View progressBarView;
+    private View contentView;
+    private boolean isProgressBarShowing = false;
     private StationRecordFragment stationRecordFragment;
 
     @Override
@@ -91,6 +94,8 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
 //               startActivity(mapIntent);
 //           }
 //       });
+        contentView = findViewById(R.id.content_view);
+        progressBarView = findViewById(R.id.progress_view);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         if (getSupportActionBar() != null)
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -208,6 +213,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
                             }
                 break;
             case GeoFenceService.ADD_GEOFENCE_SUCCESS_ACTION:
+                dismissProgressBar();
                 onWatchItem=intent.getParcelableExtra("ON_WATCH_ITEM");
                 showWatchInfoFragment();
                 break;
@@ -223,6 +229,13 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
     private void showErrorPage() {
         busSearch.setVisibility(View.GONE);
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isProgressBarShowing)
+            dismissProgressBar();
+        super.onBackPressed();
     }
 
     @Override
@@ -263,6 +276,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
 
     @Override
     public void OnStartWatchClicked(WatchItem targetItem) {
+        showProgressBar();
         Intent watchIntent=new Intent(MainActivity.this, GeoFenceService.class);
         watchIntent.setAction("com.example.guans.arrivied.service.GeoFenceService.ADD_GEOFENCE");
         watchIntent.putExtra("TARGET_ITEM",targetItem);
@@ -276,6 +290,20 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         }
         targetItem = null;
         onWatchItem = null;
+    }
+
+    @Override
+    public void showProgressBar() {
+        progressBarView.setVisibility(View.VISIBLE);
+        contentView.setClickable(false);
+        isProgressBarShowing = true;
+    }
+
+    @Override
+    public void dismissProgressBar() {
+        progressBarView.setVisibility(View.GONE);
+        contentView.setClickable(true);
+        isProgressBarShowing = false;
     }
 
     private class LocationServiceConnection implements ServiceConnection {
