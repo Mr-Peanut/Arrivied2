@@ -80,6 +80,13 @@ public class StationRecordAdapter extends RecyclerView.Adapter<StationRecordAdap
         this.recordClickedListener = recordClickedListener;
     }
 
+    public void clearAll() {
+        if (getItemCount() != 0) {
+            recordDatabase.delete(StationsRecordHelper.STATIONS_RECORD_TABLE_NAME, null, null);
+            flushData();
+        }
+    }
+
     public void remove(RecyclerView.ViewHolder adapterPosition) {
         cursor.moveToPosition(adapterPosition.getAdapterPosition());
         StationRecordItem stationItem = new StationRecordItem(cursor);

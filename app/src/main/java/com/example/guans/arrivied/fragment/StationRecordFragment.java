@@ -67,6 +67,12 @@ public class StationRecordFragment extends Fragment implements StationRecordAdap
         recordList.setAdapter(recordAdapter);
         recordList.setLayoutManager(new LinearLayoutManager(getContext()));
         recordList.addItemDecoration(new ItemDivider());
+        view.findViewById(R.id.clear_all).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recordAdapter.clearAll();
+            }
+        });
         touchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
