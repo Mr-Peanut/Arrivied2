@@ -15,6 +15,7 @@ import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.amap.api.fence.GeoFence;
+import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.service.GeoFenceService;
 import com.example.guans.arrivied.util.LOGUtil;
@@ -106,12 +107,13 @@ public class GeoFenceReceiver extends BroadcastReceiver {
     private void startNotification(Context context,Intent intent){
         Intent intent2=new Intent(context,MainActivity.class);
         intent2.setFlags(FLAG_ACTIVITY_NEW_TASK);
+        BusStationItem stationItem = intent.getParcelableExtra("TARGET_ITEM");
         PendingIntent arrivedPendingIntent=PendingIntent.getActivity(context,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
         RemoteViews headUpView=new RemoteViews("com.example.guans.arrivied",R.layout.arrived_notification_head_up_view);
         final Notification notification=new android.support.v7.app.NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.bus_station)
                 .setContentTitle("Arrived 友情提示")
-                .setContentText("您已经到站，请准备下车,滑动或点击停止提醒")
+                .setContentText("您已经到达" + (stationItem == null ? "" : stationItem.getBusStationName()) + "，请准备下车,滑动或点击停止提醒")
                 .setWhen(System.currentTimeMillis())
                 .setTicker("您已到站！")
                 .setAutoCancel(true)

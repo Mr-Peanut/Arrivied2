@@ -173,6 +173,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         mGeoFenceClientProxy.setWatchItem(watchItem);
         addGeoFence(stationItem);
         alarmIntent.putExtra("TARGET_ITEM", stationItem);
+        alarmIntent.putExtra(GeoFence.BUNDLE_KEY_FENCESTATUS, GEOFENCE_IN);
         alarmPendingIntent = PendingIntent.getBroadcast(this, PROXIMITY_REQUEST_CODE, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         offlineLocationClient.addProximityAlert(stationItem.getLatLonPoint(), 300f, 30 * 1000, alarmPendingIntent);
         handler.postDelayed(tryAddDeoFenceAgainRunnable, 2000);
