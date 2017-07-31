@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
     }
 
     private void showErrorPage() {
-//        busSearch.setVisibility(View.GONE);
+        busSearch.setVisibility(View.GONE);
 
     }
 
@@ -267,7 +267,6 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         watchIntent.setAction("com.example.guans.arrivied.service.GeoFenceService.ADD_GEOFENCE");
         watchIntent.putExtra("TARGET_ITEM",targetItem);
         startService(watchIntent);
-
     }
 
     @Override

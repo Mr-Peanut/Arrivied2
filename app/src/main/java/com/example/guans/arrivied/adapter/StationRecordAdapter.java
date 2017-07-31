@@ -2,6 +2,8 @@ package com.example.guans.arrivied.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +14,7 @@ import android.widget.TextView;
 import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.bean.StationRecordItem;
 import com.example.guans.arrivied.database.StationsRecordHelper;
+import com.example.guans.arrivied.util.LOGUtil;
 
 /**
  * Created by guans on 2017/7/30.
@@ -22,16 +25,19 @@ public class StationRecordAdapter extends RecyclerView.Adapter<StationRecordAdap
     private Context mContext;
     private StationsRecordHelper stationsRecordHelper;
     private Cursor cursor;
+    private SQLiteDatabase recordDatabase;
 
     public StationRecordAdapter(Context mContext) {
         this.mContext = mContext;
         stationsRecordHelper = new StationsRecordHelper(mContext.getApplicationContext(), StationsRecordHelper.DATABASE_NAME, null, 1);
-        cursor = stationsRecordHelper.getWritableDatabase().query(StationsRecordHelper.STATIONS_RECORD_TABLE_NAME, null, null, null, null, null, StationsRecordHelper.RECORD_ID + " DESC");
+        recordDatabase = stationsRecordHelper.getWritableDatabase();
+        cursor = recordDatabase.query(StationsRecordHelper.STATIONS_RECORD_TABLE_NAME, null, null, null, null, null, StationsRecordHelper.RECORD_ID + " DESC");
     }
 
     @Override
     public RecordHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.text_item_layout, parent, false);
+        view.setBackgroundColor(Color.WHITE);
         return new RecordHolder(view);
     }
 
@@ -70,13 +76,24 @@ public class StationRecordAdapter extends RecyclerView.Adapter<StationRecordAdap
             cursor.close();
         }
     }
-
     public void setRecordClickedListener(RecordClickedListener recordClickedListener) {
         this.recordClickedListener = recordClickedListener;
     }
 
+    public void remove(RecyclerView.ViewHolder adapterPosition) {
+        cursor.moveToPosition(adapterPosition.getAdapterPosition());
+        StationRecordItem stationItem = new StationRecordItem(cursor);
+        LOGUtil.logE(this, "remove");
+        recordDatabase.delete(StationsRecordHelper.STATIONS_RECORD_TABLE_NAME, StationsRecordHelper.RECORD_ID + "=?", new String[]{String.valueOf(stationItem.getRecordID())});
+        flushData();
+    }
+
     public interface RecordClickedListener {
         void OnRecordClicked(StationRecordItem stationRecordItem);
+    }
+
+    public interface OnSwipeHolderListener {
+        void onSwipeHolder(RecyclerView.ViewHolder holder);
     }
 
     class RecordHolder extends RecyclerView.ViewHolder {

@@ -10,10 +10,18 @@
         android:id="@+id/record_statue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="40dp"
         android:text="@string/record_fragment_name" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#cccccc" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/record_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:background="#cccccc" />
 </LinearLayout>

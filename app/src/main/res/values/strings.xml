@@ -28,4 +28,5 @@
     <string name="query_hint">请输入线路编号</string>
     <string name="show_on_map">地图显示</string>
     <string name="show_in_list">列表显示</string>
+    <string name="search_hint">搜索车站或线路</string>
 </resources>

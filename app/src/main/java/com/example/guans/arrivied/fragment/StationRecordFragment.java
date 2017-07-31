@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +27,7 @@ import com.example.guans.arrivied.bean.WatchItem;
 import com.example.guans.arrivied.database.StationsRecordHelper;
 import com.example.guans.arrivied.view.ItemDivider;
 
-public class StationRecordFragment extends Fragment implements StationRecordAdapter.RecordClickedListener, BusLineSearch.OnBusLineSearchListener {
+public class StationRecordFragment extends Fragment implements StationRecordAdapter.RecordClickedListener, BusLineSearch.OnBusLineSearchListener, StationRecordAdapter.OnSwipeHolderListener {
     private OnFragmentInteractionListener mListener;
     private BusLineSearch busLineSearch;
     private BusLineQuery busLineQuery;
@@ -35,9 +36,9 @@ public class StationRecordFragment extends Fragment implements StationRecordAdap
     private RecyclerView recordList;
     private StationRecordAdapter recordAdapter;
     private RecordUpdateReceiver recordUpdateReceiver;
+    private ItemTouchHelper touchHelper;
 
     public StationRecordFragment() {
-        // Required empty public constructor
     }
 
     public static StationRecordFragment newInstance() {
@@ -66,6 +67,18 @@ public class StationRecordFragment extends Fragment implements StationRecordAdap
         recordList.setAdapter(recordAdapter);
         recordList.setLayoutManager(new LinearLayoutManager(getContext()));
         recordList.addItemDecoration(new ItemDivider());
+        touchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                recordAdapter.remove(viewHolder);
+            }
+        });
+        touchHelper.attachToRecyclerView(recordList);
         return view;
     }
 
@@ -158,6 +171,12 @@ public class StationRecordFragment extends Fragment implements StationRecordAdap
     }
 
     private void deleteRecord(StationRecordItem selectStationRecordItem) {
+    }
+
+    @Override
+    public void onSwipeHolder(RecyclerView.ViewHolder holder) {
+        touchHelper.startSwipe(holder);
+
     }
 
     public interface OnFragmentInteractionListener {
