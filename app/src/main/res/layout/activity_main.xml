@@ -32,8 +32,9 @@
             android:background="#ffffff"
             android:hint="搜索车站或线路"
             android:minWidth="200dp"
-            android:textColor="@android:color/black"
-            android:visibility="invisible" />
+            android:textColor="@android:color/black" />
+        <!--android:visibility="invisible" -->
+        />
     </android.support.v7.widget.Toolbar>
 
     <FrameLayout

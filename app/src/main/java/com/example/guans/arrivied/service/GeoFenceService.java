@@ -275,6 +275,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         LOGUtil.logE(this, intent.getAction());
         switch (intent.getAction()) {
             case GEOFENCE_CANCLE_ATCITON:
+                watchItem = null;
                 mGeoFenceClientProxy.removeDPoint();
                 if (wakeLock.isHeld())
                     wakeLock.release();
@@ -291,6 +292,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                 if (wakeLock.isHeld())
                     wakeLock.release();
                 alarmManager.cancel(wakeupPendingIntent);
+                watchItem = null;
                 LOGUtil.logE(this, "arrived");
                 stopSelf();
                 break;

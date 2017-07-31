@@ -139,7 +139,6 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
     }
     private void showWatchInfoFragment() {
         if (watchingInfoFragment != null) {
-//            watchingInfoFragment.getArguments().putParcelable("STATION_ITEM", onWatchStation);
             watchingInfoFragment.getArguments().putParcelable("ON_WATCH_ITEM", onWatchItem);
             fragmentManager.beginTransaction().show(watchingInfoFragment).commit();
             watchingInfoFragment.flush();
@@ -222,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
     }
 
     private void showErrorPage() {
-        busSearch.setVisibility(View.GONE);
+//        busSearch.setVisibility(View.GONE);
 
     }
 
@@ -276,6 +275,8 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         if(geoFenceClientProxy!=null){
             geoFenceClientProxy.removeDPoint();
         }
+        targetItem = null;
+        onWatchItem = null;
     }
 
     private class LocationServiceConnection implements ServiceConnection {

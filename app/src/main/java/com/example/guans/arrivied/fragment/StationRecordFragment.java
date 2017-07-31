@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -63,6 +64,7 @@ public class StationRecordFragment extends Fragment implements StationRecordAdap
         recordStatue = view.findViewById(R.id.record_statue);
         recordList = view.findViewById(R.id.record_list);
         recordList.setAdapter(recordAdapter);
+        recordList.setLayoutManager(new LinearLayoutManager(getContext()));
         recordList.addItemDecoration(new ItemDivider());
         return view;
     }

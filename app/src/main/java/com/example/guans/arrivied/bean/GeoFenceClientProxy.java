@@ -16,6 +16,12 @@ import java.util.List;
 public class GeoFenceClientProxy extends Binder {
     private GeoFenceClient mGeoFenceClient;
     private GenFenceTaskObserver genFenceTaskObserver;
+    private WatchItem watchItem;
+    private BusStationItem busStationItem;
+
+    public GeoFenceClientProxy(GeoFenceClient mGeoFenceClient) {
+        this.mGeoFenceClient = mGeoFenceClient;
+    }
 
     public WatchItem getWatchItem() {
         return watchItem;
@@ -25,8 +31,6 @@ public class GeoFenceClientProxy extends Binder {
         this.watchItem = watchItem;
     }
 
-    private WatchItem watchItem;
-
     public BusStationItem getBusStationItem() {
         return busStationItem;
     }
@@ -35,14 +39,8 @@ public class GeoFenceClientProxy extends Binder {
         this.busStationItem = busStationItem;
     }
 
-    private BusStationItem busStationItem;
-
     public void setGenFenceTaskObserver(GenFenceTaskObserver genFenceTaskObserver) {
         this.genFenceTaskObserver = genFenceTaskObserver;
-    }
-
-    public GeoFenceClientProxy(GeoFenceClient mGeoFenceClient) {
-        this.mGeoFenceClient = mGeoFenceClient;
     }
 
     public void addGeoFencePoint(DPoint dPoint, float r, String id) {
@@ -53,6 +51,7 @@ public class GeoFenceClientProxy extends Binder {
     }
 
     public void removeDPoint() {
+        watchItem = null;
         if (mGeoFenceClient != null) {
             mGeoFenceClient.removeGeoFence();
             genFenceTaskObserver.onGeoPointRemoved();
