@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
 
 import com.amap.api.services.busline.BusLineItem;
 import com.amap.api.services.busline.BusStationItem;
@@ -25,6 +27,16 @@ public class SearchActivity extends AppCompatActivity implements BusSearchFragme
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.search_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
         fragmentManager=getSupportFragmentManager();
         busSearchFragment = BusSearchFragment.newInstance();
         fragmentManager.beginTransaction()

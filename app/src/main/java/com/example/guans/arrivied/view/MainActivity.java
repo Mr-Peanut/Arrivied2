@@ -12,6 +12,8 @@ import android.os.IBinder;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -28,6 +30,7 @@ import com.example.guans.arrivied.fragment.WatchingInfoFragment;
 import com.example.guans.arrivied.receiver.ControllerReceiver;
 import com.example.guans.arrivied.service.GeoFenceService;
 import com.example.guans.arrivied.service.LocateService;
+import com.example.guans.arrivied.util.CheckBatteryOptimizationUtil;
 
 
 public class MainActivity extends AppCompatActivity implements ControllerReceiver.ControlReceiveListener, WatchingInfoFragment.OnFragmentInteractionListener, SearchResultFragment.OnFragmentInteractionListener, StationRecordFragment.OnFragmentInteractionListener {
@@ -77,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         initReceiver();
         bindLocationService();
         bindGeoFenceService();
+        CheckBatteryOptimizationUtil.check(this);
     }
 
     private void bindGeoFenceService() {
@@ -94,9 +98,10 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
 //               startActivity(mapIntent);
 //           }
 //       });
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         contentView = findViewById(R.id.content_view);
         progressBarView = findViewById(R.id.progress_view);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        setSupportActionBar(toolbar);
         if (getSupportActionBar() != null)
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         busSearch = (TextView) findViewById(R.id.bus_search);
@@ -228,7 +233,6 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
 
     private void showErrorPage() {
         busSearch.setVisibility(View.GONE);
-
     }
 
     @Override
@@ -247,6 +251,23 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         unbindService(locationServiceConnection);
         unbindService(geoFenceConnection);
         super.onDestroy();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_menu_main_activity, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.setting:
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

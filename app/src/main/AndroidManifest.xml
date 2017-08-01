@@ -24,6 +24,7 @@
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
         android:name=".application.ArrivedApplication"
@@ -45,7 +46,6 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -86,7 +86,8 @@
         <activity
             android:name=".view.SearchActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
+
 
         <receiver
             android:name=".receiver.GeoFenceReceiver"
@@ -101,15 +102,21 @@
         <service
             android:name=".service.OfflineLocationService"
             android:enabled="true"
-            android:exported="false"
-             />
+            android:exported="false" />
+
         <activity
             android:name=".view.NoticeActivity"
             android:exported="true"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:theme="@style/FullScreenTheme"
-            >
+            android:theme="@style/FullScreenTheme"></activity>
+        <activity
+            android:name=".view.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".view.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.guans.arrivied.view.MainActivity" />
         </activity>
     </application>
 
