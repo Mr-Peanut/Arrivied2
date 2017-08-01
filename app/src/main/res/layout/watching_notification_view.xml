@@ -2,40 +2,46 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:minHeight="160dp"
-    android:background="@drawable/background_shape">
+    android:layout_height="90dp"
+    android:background="@drawable/background_shape"
+    android:minHeight="80dp">
     <ImageView
         android:id="@+id/cover_image"
-        android:src="@drawable/bus_station"
-        android:layout_width="120dp"
-        android:layout_height="160dp"
-        android:scaleType="centerInside"
+        android:layout_width="60dp"
+        android:layout_height="90dp"
+        android:layout_marginLeft="5dp"
         android:contentDescription=""
+        android:scaleType="centerInside"
+        android:src="@drawable/bus_station"
         tools:ignore="ContentDescription" />
     <TextView
-        android:padding="25dp"
         android:id="@+id/station_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/cover_image"
-        android:layout_toRightOf="@+id/cover_image"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:textColor="#000000"
+        android:layout_toEndOf="@+id/cover_image"
+        android:layout_toRightOf="@+id/cover_image"
+        android:paddingBottom="10dp"
+        android:paddingLeft="20dp"
+        android:paddingTop="10dp"
         android:text="@string/notification_tittle"
-        android:textSize="20sp"/>
+        android:textColor="#000000"
+        tools:ignore="RtlSymmetry" />
 
-    <Button
+    <TextView
         android:id="@+id/cancel_watch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/station_info"
         android:layout_marginEnd="23dp"
         android:layout_marginRight="23dp"
+        android:gravity="center"
+        android:text="@string/notification_cancle"
         android:textColor="#000000"
-        android:text="@string/notification_cancle" />
+        android:textSize="12sp" />
 
 </RelativeLayout>

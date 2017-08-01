@@ -31,6 +31,7 @@ import com.example.guans.arrivied.receiver.ControllerReceiver;
 import com.example.guans.arrivied.service.GeoFenceService;
 import com.example.guans.arrivied.service.LocateService;
 import com.example.guans.arrivied.util.CheckBatteryOptimizationUtil;
+import com.example.guans.arrivied.util.PermissionCheck;
 
 
 public class MainActivity extends AppCompatActivity implements ControllerReceiver.ControlReceiveListener, WatchingInfoFragment.OnFragmentInteractionListener, SearchResultFragment.OnFragmentInteractionListener, StationRecordFragment.OnFragmentInteractionListener {
@@ -81,6 +82,14 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         bindLocationService();
         bindGeoFenceService();
         CheckBatteryOptimizationUtil.check(this);
+        final String[] permissions = new String[]{"android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_NETWORK_STATE", "android.permission.INTERNET", "android.permission.ACCESS_COARSE_LOCATION"};
+        new Handler(getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                PermissionCheck.checkPermission(MainActivity.this, permissions, 0);
+            }
+        }, 1000);
+
     }
 
     private void bindGeoFenceService() {

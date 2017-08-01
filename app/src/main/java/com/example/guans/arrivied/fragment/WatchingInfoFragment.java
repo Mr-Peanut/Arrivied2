@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -18,7 +17,6 @@ import com.example.guans.arrivied.bean.WatchItem;
 
 public class WatchingInfoFragment extends Fragment {
 
-    private Button cancelWatchButton;
     private TextView showStatueTextView;
     private BusStationItem busStationItem;
     private BusLineItem busLineItem;
@@ -54,7 +52,7 @@ public class WatchingInfoFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View contentView=inflater.inflate(R.layout.fragment_watching_info, container, false);
-        cancelWatchButton=contentView.findViewById(R.id.cancel_watch);
+        TextView cancelWatchButton = contentView.findViewById(R.id.cancel_watch);
         showStatueTextView=contentView.findViewById(R.id.station_info);
         showStatueTextView.setText("正在监控"+onWatchItem.getBusStationItem().getBusStationName()+"\n"+onWatchItem.getBusLineItem().getBusLineName());
         cancelWatchButton.setOnClickListener(new View.OnClickListener() {

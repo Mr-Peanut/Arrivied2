@@ -111,7 +111,9 @@
             android:exported="true"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:theme="@style/FullScreenTheme"></activity>
+            android:theme="@style/FullScreenTheme">
+
+        </activity>
         <activity
             android:name=".view.SettingsActivity"
             android:label="@string/title_activity_settings"
