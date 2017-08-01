@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.support.v7.app.NotificationCompat;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -23,6 +22,7 @@ import com.example.guans.arrivied.view.MainActivity;
 import com.example.guans.arrivied.view.NoticeActivity;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.location.LocationManager.KEY_PROXIMITY_ENTERING;
 import static com.amap.api.fence.GeoFenceClient.GEOFENCE_IN;
 import static com.amap.api.fence.GeoFenceClient.GEOFENCE_OUT;
 import static com.amap.api.fence.GeoFenceClient.GEOFENCE_STAYED;
@@ -43,8 +43,6 @@ public class GeoFenceReceiver extends BroadcastReceiver {
                 String fenceId = bundle.getString(GeoFence.BUNDLE_KEY_FENCEID);
 //获取当前有触发的围栏对象：
                 GeoFence fence = bundle.getParcelable(GeoFence.BUNDLE_KEY_FENCE);
-
-//        Toast.makeText(context,String.valueOf(status)+"/"+customId+"/"+fenceId+"/"+fence.getPoiItem().getAddress(),Toast.LENGTH_LONG).show();
                 switch (status) {
                     case GEOFENCE_IN:
                         Toast.makeText(context, "GEOFENCE_IN", Toast.LENGTH_SHORT).show();
@@ -57,22 +55,9 @@ public class GeoFenceReceiver extends BroadcastReceiver {
                         break;
                 }
                 break;
-            //这个段代码暂时没用
-            case GeoFenceService.ARRIVED_PROXIMITY:
-                Notification gooleArrived = new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.bus_station)
-                        .setContentTitle("Arrived 友情提示")
-                        .setContentText("fromGoolge您已经到站，请准备下车,滑动或点击停止提醒,")
-                        .setWhen(System.currentTimeMillis())
-                        .setTicker("您已到站！")
-                        .setAutoCancel(true)
-                        .setPriority(Notification.PRIORITY_MAX)
-                        .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE)
-//                .setFullScreenIntent(arrivedPendingIntent,false)
-                        .build();
-                gooleArrived.flags = Notification.FLAG_ONLY_ALERT_ONCE | Notification.FLAG_AUTO_CANCEL;
-                NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                notificationManager.notify(GeoFenceService.ARRIVED_NOTIFICATION_ID, gooleArrived);
+            case GeoFenceService.ARRIVED_PROXIMITY_ACTION:
+                if (intent.getBooleanExtra(KEY_PROXIMITY_ENTERING, false))
+                    notifyArrived(context, intent);
                 break;
         }
 
@@ -115,7 +100,7 @@ public class GeoFenceReceiver extends BroadcastReceiver {
                 .setContentTitle("Arrived 友情提示")
                 .setContentText("您已经到达" + (stationItem == null ? "" : stationItem.getBusStationName()) + "，请准备下车,滑动或点击停止提醒")
                 .setWhen(System.currentTimeMillis())
-                .setTicker("您已到站！")
+                .setTicker("您已到达" + (stationItem == null ? "" : stationItem.getBusStationName()) + "！")
                 .setAutoCancel(true)
                 .setContentIntent(arrivedPendingIntent)
                 .setCustomHeadsUpContentView(headUpView)

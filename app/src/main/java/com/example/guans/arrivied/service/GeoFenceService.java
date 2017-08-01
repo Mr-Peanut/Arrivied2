@@ -53,7 +53,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     public static final String ADD_GEOFENCE_SUCCESS_ACTION = "com.example.guan.arrived.geofenceservice.ADD_GEOFENCE_SUCCESS";
     public static final String ARRIVED_ACTION = "com.example.guan.arrived.geofenceservice.ARRIVED";
     public static final String WAKE_UP_ACTION = "com.example.guan.arrived.geofenceservice.WAKE_UP";
-    public static final String ARRIVED_PROXIMITY = "com.example.guans.arrivied.service.GeoFenceService.ARRIVED_PROXIMITY";
+    public static final String ARRIVED_PROXIMITY_ACTION = "com.example.guans.arrivied.service.GeoFenceService.ARRIVED_PROXIMITY";
     public static final int PROXIMITY_REQUEST_CODE = 1001;
     private StationsRecordHelper stationsRecordHelper;
     private GeoFenceClient mGeoFenceClient;
@@ -94,7 +94,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             mGeoFenceClient.setGeoFenceListener(this);
         }
         registerReceivers();
-        alarmIntent = new Intent("com.location.apis.geofencedemo.broadcast");
+        alarmIntent = new Intent(ARRIVED_PROXIMITY_ACTION);
         handler = new Handler(getMainLooper());
         offlineLocationClient = new OfflineLocationClient(this);
         prepareAliveAction();
@@ -111,7 +111,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         controlIntentFilter.addAction(WAKE_UP_ACTION);
         controlIntentFilter.addAction(ARRIVED_ACTION);
         controlIntentFilter.addAction(LocationManager.PROVIDERS_CHANGED_ACTION);
-//        controlIntentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        controlIntentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(controller, controlIntentFilter);
     }
 
@@ -173,7 +173,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         mGeoFenceClientProxy.setWatchItem(watchItem);
         addGeoFence(stationItem);
         alarmIntent.putExtra("TARGET_ITEM", stationItem);
-        alarmIntent.putExtra(GeoFence.BUNDLE_KEY_FENCESTATUS, GEOFENCE_IN);
+//        alarmIntent.putExtra(GeoFence.BUNDLE_KEY_FENCESTATUS, GEOFENCE_IN);
         alarmPendingIntent = PendingIntent.getBroadcast(this, PROXIMITY_REQUEST_CODE, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         offlineLocationClient.addProximityAlert(stationItem.getLatLonPoint(), 300f, 30 * 1000, alarmPendingIntent);
         handler.postDelayed(tryAddDeoFenceAgainRunnable, 2000);
