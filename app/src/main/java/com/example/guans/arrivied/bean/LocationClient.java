@@ -58,5 +58,9 @@ public class LocationClient extends Binder {
         if (mLocationClient != null && mLocationClient.isStarted())
             mLocationClient.stopLocation();
     }
+
+    public void destory() {
+        mLocationClient.onDestroy();
+    }
 }
 
