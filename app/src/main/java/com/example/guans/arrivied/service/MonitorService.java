@@ -21,7 +21,7 @@ import com.example.guans.arrivied.receiver.ControllerReceiver;
 import com.example.guans.arrivied.util.CheckSystemActive;
 import com.example.guans.arrivied.util.LatLonPointTransferLatLon;
 
-import static com.example.guans.arrivied.service.GeoFenceService.ADD_GEOFENCE_ID;
+import static com.example.guans.arrivied.service.GeoFenceService.MONITOR_NOTIFICATION_ID;
 import static com.example.guans.arrivied.service.GeoFenceService.PROXIMITY_REQUEST_CODE;
 
 public class MonitorService extends Service implements ControllerReceiver.ControlReceiveListener, AMapLocationListener {
@@ -70,7 +70,7 @@ public class MonitorService extends Service implements ControllerReceiver.Contro
                 .setContentTitle("守护进程正在运行")
                 .setOngoing(true)
                 .build();
-        startForeground(ADD_GEOFENCE_ID + 1, monitorNotification);
+        startForeground(MONITOR_NOTIFICATION_ID, monitorNotification);
         return Service.START_NOT_STICKY;
     }
 

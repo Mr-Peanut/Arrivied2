@@ -53,6 +53,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     public static final String ACTION_GEOFENCE_REMOVED = "com.example.guan.arrived.geofenceservice.GEOREMOVED";
     public static final int ADD_GEOFENCE_ID = 100;
     public static final int ARRIVED_NOTIFICATION_ID = 101;
+    public static final int MONITOR_NOTIFICATION_ID = 102;
     public static final String ADD_GEOFENCE_SUCCESS_ACTION = "com.example.guan.arrived.geofenceservice.ADD_GEOFENCE_SUCCESS";
     public static final String ARRIVED_ACTION = "com.example.guan.arrived.geofenceservice.ARRIVED";
     public static final String WAKE_UP_ACTION = "com.example.guan.arrived.geofenceservice.WAKE_UP";
