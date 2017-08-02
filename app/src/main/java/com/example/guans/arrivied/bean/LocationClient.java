@@ -1,9 +1,11 @@
 package com.example.guans.arrivied.bean;
 
+import android.content.Context;
 import android.os.Binder;
 
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
 import com.example.guans.arrivied.util.LOGUtil;
 
 /**
@@ -18,6 +20,17 @@ public class LocationClient extends Binder {
         this.mLocationClient = mLocationClient;
         this.mLocationOption = mLocationOption;
         LOGUtil.logE(this, "constructor");
+    }
+
+    public LocationClient(Context context, AMapLocationListener listener) {
+        mLocationClient = new AMapLocationClient(context.getApplicationContext());
+        mLocationOption = new AMapLocationClientOption();
+        mLocationClient.setLocationListener(listener);
+        mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
+//设置定位间隔,单位毫秒,默认为2000ms
+        mLocationOption.setInterval(2000);
+//        mLocationClient.startLocation();
+//设置定位参数
     }
 
     public void startLocateOneTime() {

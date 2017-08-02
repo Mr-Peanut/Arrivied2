@@ -1,15 +1,12 @@
 package com.example.guans.arrivied.receiver;
 
-import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -17,6 +14,7 @@ import com.amap.api.fence.GeoFence;
 import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.service.GeoFenceService;
+import com.example.guans.arrivied.util.CheckSystemActive;
 import com.example.guans.arrivied.util.LOGUtil;
 import com.example.guans.arrivied.view.MainActivity;
 import com.example.guans.arrivied.view.NoticeActivity;
@@ -73,22 +71,7 @@ public class GeoFenceReceiver extends BroadcastReceiver {
 //            }
 //        },20*1000);
     }
-    private boolean isKeyLocked(Context context){
-        KeyguardManager keyguardManager= (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            return keyguardManager.isDeviceLocked()||keyguardManager.isKeyguardLocked();
-        }else {
-            return keyguardManager.isKeyguardLocked();
-        }
-    }
-    private boolean isScreenOn(Context context){
-        PowerManager powerManager= (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
-            return powerManager.isInteractive();
-        }else {
-            return powerManager.isScreenOn();
-        }
-    }
+
     private void startNotification(Context context,Intent intent){
         Intent intent2=new Intent(context,MainActivity.class);
         intent2.setFlags(FLAG_ACTIVITY_NEW_TASK);
@@ -118,8 +101,7 @@ public class GeoFenceReceiver extends BroadcastReceiver {
 //            View view=layoutInflater.inflate(headUpView.getLayoutId(),null);
 //            headUpManager.showHeadUp(view,GeoFenceService.ARRIVED_NOTIFICATION_ID);
 //        }
-
-        if(!isScreenOn(context)||isKeyLocked(context))
+        if (!CheckSystemActive.isScreenOn(context) || CheckSystemActive.isKeyLocked(context))
         startNotifiedActivity(context, intent);
     }
     private void startNotifiedActivity(Context context,Intent intent){
