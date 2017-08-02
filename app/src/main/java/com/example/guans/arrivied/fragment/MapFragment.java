@@ -1,18 +1,22 @@
 package com.example.guans.arrivied.fragment;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.amap.api.maps2d.AMap;
 import com.amap.api.maps2d.AMapException;
 import com.amap.api.maps2d.CameraUpdate;
 import com.amap.api.maps2d.CameraUpdateFactory;
 import com.amap.api.maps2d.MapView;
+import com.amap.api.maps2d.model.BitmapDescriptorFactory;
 import com.amap.api.maps2d.model.CameraPosition;
 import com.amap.api.maps2d.model.LatLng;
 import com.amap.api.maps2d.model.LatLngBounds;
@@ -27,6 +31,8 @@ import com.example.guans.arrivied.R;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.amap.api.maps2d.model.BitmapDescriptorFactory.HUE_RED;
 
 
 public class MapFragment extends Fragment implements AMap.OnMarkerClickListener {
@@ -86,13 +92,21 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
            }
            aMap.addPolyline(polyLineOptions);
             List<BusStationItem> stationItems=busLineItem.getBusStations();
+            ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             for(BusStationItem busStationItem:stationItems){
+
                 Marker marker=aMap.addMarker(new MarkerOptions()
                         .position(new LatLng(busStationItem.getLatLonPoint().getLatitude(),busStationItem.getLatLonPoint().getLongitude())));
                 marker.setTitle(busStationItem.getBusStationName());
-                marker.showInfoWindow();
+                TextView textView = new TextView(getContext());
+                textView.setLayoutParams(layoutParams);
+                textView.setGravity(Gravity.CENTER);
+                textView.setBackgroundColor(Color.WHITE);
+                textView.setText(busStationItem.getBusStationName());
+//                marker.showInfoWindow();
                 marker.setDraggable(false);
                 marker.setObject(busStationItem);
+                marker.setIcon(BitmapDescriptorFactory.fromView(textView));
                 markers.add(marker);
             }
            List<LatLonPoint> latLngBounds=busLineItem.getBounds();
@@ -111,6 +125,7 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
     private void initLocationPoint() {
         myLocationStyle = new MyLocationStyle();//初始化定位蓝点样式类myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);//连续定位、且将视角移动到地图中心点，定位点依照设备方向旋转，并且会跟随设备移动。（1秒1次定位）如果不设置myLocationType，默认也会执行此种模式。
         myLocationStyle.interval(5000); //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
+        myLocationStyle.myLocationIcon(BitmapDescriptorFactory.defaultMarker(HUE_RED));
         aMap.setMyLocationStyle(myLocationStyle);//设置定位蓝点的Style
 //aMap.getUiSettings().setMyLocationButtonEnabled(true);设置默认定位按钮是否显示，非必需设置。
         aMap.setMyLocationEnabled(true);// 设置为true表示启动显示定位蓝点，false表示隐藏定位蓝点并不进行定位，默认是false。

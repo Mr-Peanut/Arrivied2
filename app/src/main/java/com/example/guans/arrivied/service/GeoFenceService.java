@@ -1,13 +1,14 @@
 package com.example.guans.arrivied.service;
 
-import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -22,15 +23,11 @@ import android.widget.Toast;
 import com.amap.api.fence.GeoFence;
 import com.amap.api.fence.GeoFenceClient;
 import com.amap.api.fence.GeoFenceListener;
-import com.amap.api.location.AMapLocation;
-import com.amap.api.location.AMapLocationListener;
 import com.amap.api.location.DPoint;
-import com.amap.api.maps2d.AMapUtils;
-import com.amap.api.maps2d.model.LatLng;
+import com.amap.api.services.busline.BusLineItem;
 import com.amap.api.services.busline.BusStationItem;
 import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.bean.GeoFenceClientProxy;
-import com.example.guans.arrivied.bean.LocationClient;
 import com.example.guans.arrivied.bean.OfflineLocationClient;
 import com.example.guans.arrivied.bean.WatchItem;
 import com.example.guans.arrivied.database.StationsRecordHelper;
@@ -38,7 +35,6 @@ import com.example.guans.arrivied.process.LiveActivity;
 import com.example.guans.arrivied.process.ScreenChangeReceiver;
 import com.example.guans.arrivied.receiver.ControllerReceiver;
 import com.example.guans.arrivied.util.LOGUtil;
-import com.example.guans.arrivied.util.LatLonPointTransferLatLon;
 import com.example.guans.arrivied.view.MainActivity;
 
 import java.util.List;
@@ -47,7 +43,7 @@ import static com.amap.api.fence.GeoFenceClient.GEOFENCE_IN;
 import static com.amap.api.fence.GeoFenceClient.GEOFENCE_OUT;
 import static com.amap.api.fence.GeoFenceClient.GEOFENCE_STAYED;
 
-public class GeoFenceService extends Service implements ControllerReceiver.ControlReceiveListener, GeoFenceListener, GeoFenceClientProxy.GenFenceTaskObserver, ScreenChangeReceiver.OnBroadcastReceiveListener, AMapLocationListener {
+public class GeoFenceService extends Service implements ControllerReceiver.ControlReceiveListener, GeoFenceListener, GeoFenceClientProxy.GenFenceTaskObserver, ScreenChangeReceiver.OnBroadcastReceiveListener {
     public static final int ADD_DPOINT = 1;
     //定义接收广播的action字符串
     public static final String GEOFENCE_BROADCAST_ACTION = "com.location.apis.geofencedemo.broadcast";
@@ -55,7 +51,6 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     public static final String ADD_DPOINT_ACTION = "com.example.guans.arrivied.service.GeoFenceService.ADD_GEOFENCE";
     public static final String ACTION_GEOFENCE_SERVICE_BIND = "com.example.guan.arrived.geofenceservice.SERVICE_BIND";
     public static final String ACTION_GEOFENCE_REMOVED = "com.example.guan.arrived.geofenceservice.GEOREMOVED";
-    public static final String ACTION_LOCATION = "com.example.guan.arrived.geofenceservice.LOCATION";
     public static final int ADD_GEOFENCE_ID = 100;
     public static final int ARRIVED_NOTIFICATION_ID = 101;
     public static final String ADD_GEOFENCE_SUCCESS_ACTION = "com.example.guan.arrived.geofenceservice.ADD_GEOFENCE_SUCCESS";
@@ -63,22 +58,23 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     public static final String WAKE_UP_ACTION = "com.example.guan.arrived.geofenceservice.WAKE_UP";
     public static final String ARRIVED_PROXIMITY_ACTION = "com.example.guans.arrivied.service.GeoFenceService.ARRIVED_PROXIMITY";
     public static final int PROXIMITY_REQUEST_CODE = 1001;
+    private LocationManager locationManager;
     private StationsRecordHelper stationsRecordHelper;
     private GeoFenceClient mGeoFenceClient;
     private BusStationItem stationItem;
     private GeoFenceClientProxy mGeoFenceClientProxy;
     private PowerManager.WakeLock wakeLock;
     private boolean isWatching = false;
-    private boolean hasLocated = false;
     private ScreenChangeReceiver screenChangeReceiver;
     private ControllerReceiver controller;
     private AlarmManager alarmManager;
     private PendingIntent wakeupPendingIntent;
     private Handler handler;
     private ConnectivityManager connectivityManager;
-    private LocationManager locationManager;
     private WatchItem watchItem;
     private OfflineLocationClient offlineLocationClient;
+    private BusLineItem busLineItem;
+    private float r = 500f;
     private Runnable tryAddDeoFenceAgainRunnable = new Runnable() {
         @Override
         public void run() {
@@ -89,8 +85,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     private PendingIntent alarmPendingIntent;
     private Intent alarmIntent;
     private PowerManager pm;
-    private LocationClient locationClient;
-    private PendingIntent locationPendingIntent;
+    private Intent monitorService;
+    private MonitorConnection monitorServiceConnection;
 
     public GeoFenceService() {
     }
@@ -112,8 +108,14 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         stationsRecordHelper = new StationsRecordHelper(this.getApplicationContext(), StationsRecordHelper.DATABASE_NAME, null, 1);
+        bindMonitorService();
     }
 
+    private void bindMonitorService() {
+        monitorService = new Intent(this, MonitorService.class);
+//         monitorServiceConnection=new MonitorConnection();
+//         bindService(monitorService,monitorServiceConnection,BIND_AUTO_CREATE);
+    }
     private void registerReceivers() {
         screenChangeReceiver = new ScreenChangeReceiver(this);
         controller = new ControllerReceiver(this);
@@ -123,7 +125,6 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         controlIntentFilter.addAction(ARRIVED_ACTION);
         controlIntentFilter.addAction(LocationManager.PROVIDERS_CHANGED_ACTION);
         controlIntentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        controlIntentFilter.addAction(ACTION_LOCATION);
         registerReceiver(controller, controlIntentFilter);
     }
 
@@ -133,7 +134,6 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CPUKeepRunning");
         alarmManager = (AlarmManager) getSystemService(Service.ALARM_SERVICE);
         wakeupPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(WAKE_UP_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
-        locationPendingIntent = PendingIntent.getBroadcast(this, 1, new Intent(ACTION_LOCATION), PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     @Override
@@ -143,7 +143,6 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         addGeoFence(intent);
         startAlarmTask();
         isWatching = true;
-//        }
         return Service.START_NOT_STICKY;
     }
     /*
@@ -173,7 +172,6 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                     .setStyle(new NotificationCompat.BigPictureStyle())
                     .setOngoing(true)
                     .setCustomBigContentView(remoteViews);
-
             notification = notificationBuilder.build();
         }
         startForeground(ADD_GEOFENCE_ID, notification);
@@ -182,12 +180,19 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     private void addGeoFence(Intent intent) {
         watchItem = intent.getParcelableExtra("TARGET_ITEM");
         stationItem = watchItem.getBusStationItem();
+        busLineItem = watchItem.getBusLineItem();
+        if (busLineItem.getBusLineType().contains("地铁")) {
+            r = 1000.0f;
+        } else {
+            r = 500f;
+        }
         mGeoFenceClientProxy.setBusStationItem(stationItem);
         mGeoFenceClientProxy.setWatchItem(watchItem);
         addGeoFence(stationItem);
         alarmIntent.putExtra("TARGET_ITEM", stationItem);
         alarmPendingIntent = PendingIntent.getBroadcast(this, PROXIMITY_REQUEST_CODE, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        offlineLocationClient.addProximityAlert(stationItem.getLatLonPoint(), 300f, 30 * 1000, alarmPendingIntent);
+
+        offlineLocationClient.addProximityAlert(stationItem.getLatLonPoint(), r, 30 * 1000, alarmPendingIntent);
         handler.postDelayed(tryAddDeoFenceAgainRunnable, 2000);
     }
 
@@ -195,7 +200,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         DPoint dPoint = new DPoint();
         dPoint.setLatitude(stationItem.getLatLonPoint().getLatitude());
         dPoint.setLongitude(stationItem.getLatLonPoint().getLongitude());
-        mGeoFenceClient.addGeoFence(dPoint, 300f, "BUS_STATION");
+        mGeoFenceClient.addGeoFence(dPoint, r, "BUS_STATION");
     }
 
     @Override
@@ -220,12 +225,10 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         if (wakeLock.isHeld())
             wakeLock.release();
         LOGUtil.logE(this, "onDestroy");
-        if (locationClient != null) {
-            locationClient.destory();
-        }
         mGeoFenceClient.removeGeoFence();
         mGeoFenceClient = null;
         mGeoFenceClientProxy = null;
+//        unbindService(monitorServiceConnection);
         super.onDestroy();
     }
 
@@ -244,6 +247,12 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             intent.putExtra("ON_WATCH_ITEM", watchItem);
             sendBroadcast(intent);
             isWatching = true;
+            monitorService.putExtra("TARGET_ITEM", watchItem);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                monitorService.putExtra("R", r);
+                startService(monitorService);
+
+            }
         } else {
             Toast.makeText(getApplicationContext(), "围栏创建失败" + s, Toast.LENGTH_SHORT).show();
             LOGUtil.logE(this, "围栏创建失败" + s);
@@ -268,8 +277,9 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             wakeLock.release();
         }
         sendBroadcast(removeGeoFenceIntent);
-        alarmManager.cancel(locationPendingIntent);
         stopSelf();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            stopService(monitorService);
     }
 
     @Override
@@ -330,12 +340,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                     Toast.makeText(this, "GPS 不可用，可能会影响定位精度", Toast.LENGTH_SHORT).show();
                 }
                 break;
-            case ACTION_LOCATION:
-                if (locationClient == null) {
-                    locationClient = new LocationClient(this, this);
-                }
-                locationClient.startLocateOneTime();
         }
+
     }
 
     private boolean checkNetStatueIsAlive() {
@@ -343,25 +349,18 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         return netInfo != null && netInfo.isAvailable() && netInfo.isConnected();
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
-    @Override
-    public void onLocationChanged(AMapLocation aMapLocation) {
-        if (isWatching) {
-            switch (aMapLocation.getErrorCode()) {
-                case 1000:
-                    float distance = AMapUtils.calculateLineDistance(new LatLng(aMapLocation.getLatitude(), aMapLocation.getLongitude()), LatLonPointTransferLatLon.getLatLonFromLatLngPoint(watchItem.getBusStationItem().getLatLonPoint()));
-                    if (distance >= 1000) {
-                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, (long) ((distance - 1000) / 18 * 1000), locationPendingIntent);
-                    } else if (distance > 300) {
-                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, Math.max((long) (distance / 18 * 1000), 30 * 1000), locationPendingIntent);
-                    } else {
-                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, 0, alarmPendingIntent);
-                    }
-                    break;
-                default:
-                    locationClient.startLocateOneTime();
-                    break;
-            }
+    class MonitorConnection implements ServiceConnection {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+
         }
     }
+
+
 }

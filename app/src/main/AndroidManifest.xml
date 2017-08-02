@@ -46,6 +46,7 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -86,10 +87,7 @@
         <activity
             android:name=".view.SearchActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-
-        </activity>
-
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
 
         <receiver
             android:name=".receiver.GeoFenceReceiver"
@@ -111,9 +109,7 @@
             android:exported="true"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:theme="@style/FullScreenTheme">
-
-        </activity>
+            android:theme="@style/FullScreenTheme"></activity>
         <activity
             android:name=".view.SettingsActivity"
             android:label="@string/title_activity_settings"
@@ -122,6 +118,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.guans.arrivied.view.MainActivity" />
         </activity>
+
+        <service
+            android:name=".service.MonitorService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>
