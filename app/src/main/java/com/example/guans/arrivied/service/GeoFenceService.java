@@ -192,12 +192,12 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         }
         mGeoFenceClientProxy.setBusStationItem(stationItem);
         mGeoFenceClientProxy.setWatchItem(watchItem);
-        addGeoFence(stationItem);
+//        addGeoFence(stationItem);
         alarmIntent.putExtra("TARGET_ITEM", stationItem);
         alarmPendingIntent = PendingIntent.getBroadcast(this, PROXIMITY_REQUEST_CODE, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
         offlineLocationClient.addProximityAlert(stationItem.getLatLonPoint(), r, 30 * 1000, alarmPendingIntent);
-        handler.postDelayed(tryAddDeoFenceAgainRunnable, 2000);
+//        handler.postDelayed(tryAddDeoFenceAgainRunnable, 2000);
+        startWatch();
     }
 
     private void addGeoFence(BusStationItem stationItem) {
@@ -234,6 +234,27 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         mGeoFenceClientProxy = null;
 //        unbindService(monitorServiceConnection);
         super.onDestroy();
+    }
+
+    private void startWatch() {
+        startWatchingNotification();
+        handler.removeCallbacks(tryAddDeoFenceAgainRunnable);
+        stationsRecordHelper.insertData(watchItem);
+        //发送一个广播通知UI控件更新状态
+        //更改该服务到前台通知
+        //geoFenceList就是已经添加的围栏列表，可据此查看创建的围栏
+        //发送一个添加围栏成功的broadcast，更新ui
+        Intent intent = new Intent(ADD_GEOFENCE_SUCCESS_ACTION);
+        intent.putExtra("ON_WATCH_ITEM", watchItem);
+        sendBroadcast(intent);
+        isWatching = true;
+        monitorService.putExtra("TARGET_ITEM", watchItem);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            monitorService.putExtra("R", r);
+            startService(monitorService);
+
+        }
+
     }
 
     @Override
