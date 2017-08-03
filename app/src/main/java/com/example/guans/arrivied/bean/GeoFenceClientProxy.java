@@ -46,7 +46,7 @@ public class GeoFenceClientProxy extends Binder {
     public void addGeoFencePoint(DPoint dPoint, float r, String id) {
         if (mGeoFenceClient != null) {
             mGeoFenceClient.addGeoFence(dPoint, r, id);
-            genFenceTaskObserver.onGeoPointAdd(dPoint,r,id);
+            genFenceTaskObserver.onGeoPointAdd(dPoint, r, id);
         }
     }
 
@@ -57,13 +57,16 @@ public class GeoFenceClientProxy extends Binder {
             genFenceTaskObserver.onGeoPointRemoved();
         }
     }
-    public List<GeoFence> getGeoFences(){
-        if(mGeoFenceClient!=null)
+
+    public List<GeoFence> getGeoFences() {
+        if (mGeoFenceClient != null)
             return mGeoFenceClient.getAllGeoFence();
         return null;
     }
+
     public interface GenFenceTaskObserver {
         void onGeoPointAdd(DPoint dPoint, float r, String id);
+
         void onGeoPointRemoved();
     }
 }

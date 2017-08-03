@@ -17,14 +17,14 @@ import java.util.List;
  * Created by guans on 2017/7/14.
  */
 
-public class BusLineSearchSuggestAdapter extends RecyclerView.Adapter <BusLineSearchSuggestAdapter.ItemHolder>{
+public class BusLineSearchSuggestAdapter extends RecyclerView.Adapter<BusLineSearchSuggestAdapter.ItemHolder> {
     private List<String> sugessutList;
     private Context mContext;
 
     public BusLineSearchSuggestAdapter(ArrayList<String> sugessutList, Context mContext) {
-        if (sugessutList==null){
-            this.sugessutList=new ArrayList<>();
-        }else {
+        if (sugessutList == null) {
+            this.sugessutList = new ArrayList<>();
+        } else {
             this.sugessutList = sugessutList;
         }
         this.mContext = mContext;
@@ -37,7 +37,7 @@ public class BusLineSearchSuggestAdapter extends RecyclerView.Adapter <BusLineSe
 
     @Override
     public ItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ItemHolder(LayoutInflater.from(mContext).inflate(R.layout.text_item_layout,parent));
+        return new ItemHolder(LayoutInflater.from(mContext).inflate(R.layout.text_item_layout, parent));
     }
 
     @Override
@@ -47,18 +47,19 @@ public class BusLineSearchSuggestAdapter extends RecyclerView.Adapter <BusLineSe
 
     @Override
     public int getItemCount() {
-        if(sugessutList==null)
+        if (sugessutList == null)
             return 0;
         return sugessutList.size();
     }
-    class ItemHolder extends RecyclerView.ViewHolder{
+
+    class ItemHolder extends RecyclerView.ViewHolder {
         LinearLayout itemRootView;
         TextView itemView;
 
         ItemHolder(View view) {
             super(view);
-            itemRootView=view.findViewById(R.id.text_item_root);
-            itemView=view.findViewById(R.id.text_item);
+            itemRootView = view.findViewById(R.id.text_item_root);
+            itemView = view.findViewById(R.id.text_item);
         }
     }
 }

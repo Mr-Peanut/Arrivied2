@@ -42,7 +42,7 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
     private BusStationItem targetBustStationItem;
     private MyLocationStyle myLocationStyle;
     private BusLineItem busLineItem;
-    private  List<LatLonPoint> lineLatLonPoints;
+    private List<LatLonPoint> lineLatLonPoints;
     private PolylineOptions polyLineOptions;
     private List<Marker> markers;
 
@@ -66,37 +66,38 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
         if (getArguments() != null) {
             busLineItem = getArguments().getParcelable("LINE_ITEM");
         }
-        markers=new ArrayList<>();
+        markers = new ArrayList<>();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view= inflater.inflate(R.layout.fragment_map, container, false);
-        mapView=view.findViewById(R.id.map);
+        View view = inflater.inflate(R.layout.fragment_map, container, false);
+        mapView = view.findViewById(R.id.map);
         mapView.onCreate(savedInstanceState);
-        aMap=mapView.getMap();
+        aMap = mapView.getMap();
         aMap.setOnMarkerClickListener(this);
-        cameraPosition=aMap.getCameraPosition();
+        cameraPosition = aMap.getCameraPosition();
         initLocationPoint();
         initBusLineOnMap();
         return view;
     }
-    private void initBusLineOnMap() {
-        if(busLineItem!=null){
-            markers.clear();
-           lineLatLonPoints= busLineItem.getDirectionsCoordinates();
-            polyLineOptions=new PolylineOptions();
-           for(LatLonPoint point:lineLatLonPoints){
-               polyLineOptions.add(new LatLng(point.getLatitude(),point.getLongitude()));
-           }
-           aMap.addPolyline(polyLineOptions);
-            List<BusStationItem> stationItems=busLineItem.getBusStations();
-            ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            for(BusStationItem busStationItem:stationItems){
 
-                Marker marker=aMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(busStationItem.getLatLonPoint().getLatitude(),busStationItem.getLatLonPoint().getLongitude())));
+    private void initBusLineOnMap() {
+        if (busLineItem != null) {
+            markers.clear();
+            lineLatLonPoints = busLineItem.getDirectionsCoordinates();
+            polyLineOptions = new PolylineOptions();
+            for (LatLonPoint point : lineLatLonPoints) {
+                polyLineOptions.add(new LatLng(point.getLatitude(), point.getLongitude()));
+            }
+            aMap.addPolyline(polyLineOptions);
+            List<BusStationItem> stationItems = busLineItem.getBusStations();
+            ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            for (BusStationItem busStationItem : stationItems) {
+
+                Marker marker = aMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(busStationItem.getLatLonPoint().getLatitude(), busStationItem.getLatLonPoint().getLongitude())));
                 marker.setTitle(busStationItem.getBusStationName());
                 TextView textView = new TextView(getContext());
                 textView.setLayoutParams(layoutParams);
@@ -109,19 +110,20 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
                 marker.setIcon(BitmapDescriptorFactory.fromView(textView));
                 markers.add(marker);
             }
-           List<LatLonPoint> latLngBounds=busLineItem.getBounds();
-            LatLonPoint leftUp=latLngBounds.get(0);
-            LatLonPoint rightDown=latLngBounds.get(1);
-            LatLng center=new LatLng((leftUp.getLongitude()+rightDown.getLongitude())/2,(leftUp.getLatitude()+rightDown.getLatitude())/2);
+            List<LatLonPoint> latLngBounds = busLineItem.getBounds();
+            LatLonPoint leftUp = latLngBounds.get(0);
+            LatLonPoint rightDown = latLngBounds.get(1);
+            LatLng center = new LatLng((leftUp.getLongitude() + rightDown.getLongitude()) / 2, (leftUp.getLatitude() + rightDown.getLatitude()) / 2);
             try {
-                LatLngBounds latLngBounds1=new LatLngBounds(new LatLng(leftUp.getLatitude(),leftUp.getLongitude()),new LatLng(rightDown.getLatitude(),rightDown.getLongitude()));
-                CameraUpdate cameraUpdate=CameraUpdateFactory.newLatLngBounds(latLngBounds1,450);
+                LatLngBounds latLngBounds1 = new LatLngBounds(new LatLng(leftUp.getLatitude(), leftUp.getLongitude()), new LatLng(rightDown.getLatitude(), rightDown.getLongitude()));
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(latLngBounds1, 450);
                 aMap.moveCamera(cameraUpdate);
             } catch (AMapException e) {
                 e.printStackTrace();
             }
         }
     }
+
     private void initLocationPoint() {
         myLocationStyle = new MyLocationStyle();//初始化定位蓝点样式类myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);//连续定位、且将视角移动到地图中心点，定位点依照设备方向旋转，并且会跟随设备移动。（1秒1次定位）如果不设置myLocationType，默认也会执行此种模式。
         myLocationStyle.interval(5000); //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
@@ -193,8 +195,8 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
 
     @Override
     public void onDestroy() {
-        if(!markers.isEmpty()){
-            for(Marker marker:markers){
+        if (!markers.isEmpty()) {
+            for (Marker marker : markers) {
                 marker.destroy();
             }
         }
@@ -202,8 +204,9 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
         mapView.onDestroy();
         super.onDestroy();
     }
-    public void flush(){
-        busLineItem=getArguments().getParcelable("LINE_ITEM");
+
+    public void flush() {
+        busLineItem = getArguments().getParcelable("LINE_ITEM");
         initBusLineOnMap();
     }
 
@@ -232,6 +235,7 @@ public class MapFragment extends Fragment implements AMap.OnMarkerClickListener 
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+
         void onStationItemClick(BusStationItem busStationItem);
     }
 }

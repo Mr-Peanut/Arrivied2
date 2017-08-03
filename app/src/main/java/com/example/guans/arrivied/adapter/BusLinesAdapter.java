@@ -21,20 +21,19 @@ import java.util.List;
 public class BusLinesAdapter extends RecyclerView.Adapter<BusLinesAdapter.BusLineItemHolder> {
     private List<BusLineItem> busLineItems;
     private Context mContext;
-
-    public void setLineItemClickListener(OnLineItemClickListener lineItemClickListener) {
-        this.lineItemClickListener = lineItemClickListener;
-    }
-
     private OnLineItemClickListener lineItemClickListener;
 
     public BusLinesAdapter(List<BusLineItem> busLineItems, Context mContext) {
-        if(busLineItems==null){
-            this.busLineItems=new ArrayList<>();
-        }else {
+        if (busLineItems == null) {
+            this.busLineItems = new ArrayList<>();
+        } else {
             this.busLineItems = busLineItems;
         }
         this.mContext = mContext;
+    }
+
+    public void setLineItemClickListener(OnLineItemClickListener lineItemClickListener) {
+        this.lineItemClickListener = lineItemClickListener;
     }
 
     public void setBusLineItems(List<BusLineItem> busLineItems) {
@@ -44,8 +43,8 @@ public class BusLinesAdapter extends RecyclerView.Adapter<BusLinesAdapter.BusLin
 
     @Override
     public BusLineItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view= LayoutInflater.from(mContext).inflate(R.layout.text_item_layout,null);
-        final BusLineItemHolder busLineItemHolder=new BusLineItemHolder(view);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.text_item_layout, null);
+        final BusLineItemHolder busLineItemHolder = new BusLineItemHolder(view);
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -57,26 +56,29 @@ public class BusLinesAdapter extends RecyclerView.Adapter<BusLinesAdapter.BusLin
 
     @Override
     public void onBindViewHolder(BusLineItemHolder holder, int position) {
-        BusLineItem busLineItem=busLineItems.get(position);
-        holder.itemView.setText(busLineItem.getBusLineName()+" "+ busLineItem.getBusLineName());
+        BusLineItem busLineItem = busLineItems.get(position);
+        holder.itemView.setText(busLineItem.getBusLineName() + " " + busLineItem.getBusLineName());
     }
 
     @Override
     public int getItemCount() {
-        if(busLineItems==null)
+        if (busLineItems == null)
             return 0;
         return busLineItems.size();
     }
-    class BusLineItemHolder extends RecyclerView.ViewHolder{
+
+    public interface OnLineItemClickListener {
+        void onLineItemClick(BusLineItem busLineItem);
+    }
+
+    class BusLineItemHolder extends RecyclerView.ViewHolder {
         LinearLayout itemRootView;
         TextView itemView;
+
         BusLineItemHolder(View view) {
             super(view);
-            itemRootView=view.findViewById(R.id.text_item_root);
-            itemView=view.findViewById(R.id.text_item);
+            itemRootView = view.findViewById(R.id.text_item_root);
+            itemView = view.findViewById(R.id.text_item);
         }
-    }
-    public interface OnLineItemClickListener{
-        void onLineItemClick(BusLineItem busLineItem);
     }
 }

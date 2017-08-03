@@ -1,10 +1,8 @@
 package com.example.guans.arrivied.view;
 
-import android.app.Notification;
 import android.app.NotificationManager;
-import android.os.Vibrator;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -13,7 +11,7 @@ import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.service.GeoFenceService;
 
 public class NoticeActivity extends AppCompatActivity {
-//    private Vibrator vibrator;
+    //    private Vibrator vibrator;
     private NotificationManager notificationManager;
 
 
@@ -24,7 +22,7 @@ public class NoticeActivity extends AppCompatActivity {
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         setContentView(R.layout.activity_notice);
 //        vibrator= (Vibrator) getSystemService(VIBRATOR_SERVICE);
-        notificationManager= (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Button cancelButton = (Button) findViewById(R.id.cancel_notified);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override

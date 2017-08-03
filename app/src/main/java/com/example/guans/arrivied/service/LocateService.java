@@ -2,9 +2,7 @@ package com.example.guans.arrivied.service;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -20,6 +18,7 @@ public class LocateService extends Service implements AMapLocationListener {
     private AMapLocationClientOption mLocationOption = null;
     private Intent locationResultIntent;
     private LocationClient locationClient;
+
     public LocateService() {
         LOGUtil.logE(this, "constructor");
     }

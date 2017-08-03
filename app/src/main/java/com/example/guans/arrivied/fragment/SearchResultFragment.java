@@ -49,12 +49,12 @@ public class SearchResultFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View contentView=inflater.inflate(R.layout.fragment_seach_result, container, false);
-        targetLineName=contentView.findViewById(R.id.target_line_name);
-        targetStationName=contentView.findViewById(R.id.target_station_name);
+        View contentView = inflater.inflate(R.layout.fragment_seach_result, container, false);
+        targetLineName = contentView.findViewById(R.id.target_line_name);
+        targetStationName = contentView.findViewById(R.id.target_station_name);
         targetStationName.setText(targetItem.getBusStationItem().getBusStationName());
         targetLineName.setText(targetItem.getBusLineItem().getBusLineName());
-        startWatch=contentView.findViewById(R.id.start_watch);
+        startWatch = contentView.findViewById(R.id.start_watch);
         startWatch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -80,12 +80,13 @@ public class SearchResultFragment extends Fragment {
                     + " must implement OnFragmentInteractionListener");
         }
     }
-  public  void flush(){
+
+    public void flush() {
 //        targetStation=getArguments().getParcelable("STATION_ITEM");
 //        targetLine=getArguments().getParcelable("LINE_ITEM");
-      targetItem=getArguments().getParcelable("WATCH_ITEM");
-      targetStationName.setText(targetItem != null ? targetItem.getBusStationItem().getBusStationName() : null);
-      targetLineName.setText(targetItem.getBusLineItem().getBusLineName());
+        targetItem = getArguments().getParcelable("WATCH_ITEM");
+        targetStationName.setText(targetItem != null ? targetItem.getBusStationItem().getBusStationName() : null);
+        targetLineName.setText(targetItem.getBusLineItem().getBusLineName());
     }
 
     @Override
@@ -93,8 +94,10 @@ public class SearchResultFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
+
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
+
         void OnStartWatchClicked(WatchItem targetStation);
 
         void showProgressBar();

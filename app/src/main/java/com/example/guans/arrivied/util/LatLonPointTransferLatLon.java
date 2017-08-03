@@ -8,10 +8,11 @@ import com.amap.api.services.core.LatLonPoint;
  */
 
 public class LatLonPointTransferLatLon {
-    public static LatLng getLatLonFromLatLngPoint(LatLonPoint latLonPoint){
-        return new LatLng(latLonPoint.getLatitude(),latLonPoint.getLatitude());
+    public static LatLng getLatLonFromLatLngPoint(LatLonPoint latLonPoint) {
+        return new LatLng(latLonPoint.getLatitude(), latLonPoint.getLatitude());
     }
-    public static LatLonPoint getLatLonPointFromLatLon(LatLng latLng){
-        return new LatLonPoint(latLng.latitude,latLng.longitude);
+
+    public static LatLonPoint getLatLonPointFromLatLon(LatLng latLng) {
+        return new LatLonPoint(latLng.latitude, latLng.longitude);
     }
 }

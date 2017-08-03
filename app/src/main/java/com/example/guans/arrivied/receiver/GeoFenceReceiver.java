@@ -60,25 +60,26 @@ public class GeoFenceReceiver extends BroadcastReceiver {
         }
 
     }
+
     private void notifyArrived(final Context context, final Intent intent) {
-        Intent arrivedIntent=new Intent(GeoFenceService.ARRIVED_ACTION);
+        Intent arrivedIntent = new Intent(GeoFenceService.ARRIVED_ACTION);
         context.sendBroadcast(arrivedIntent);
 //        Handler handler=new Handler(Looper.getMainLooper());
 //        handler.postDelayed(new Runnable() {
 //            @Override
 //            public void run() {
-                startNotification(context, intent);
+        startNotification(context, intent);
 //            }
 //        },20*1000);
     }
 
-    private void startNotification(Context context,Intent intent){
-        Intent intent2=new Intent(context,MainActivity.class);
+    private void startNotification(Context context, Intent intent) {
+        Intent intent2 = new Intent(context, MainActivity.class);
         intent2.setFlags(FLAG_ACTIVITY_NEW_TASK);
         BusStationItem stationItem = intent.getParcelableExtra("TARGET_ITEM");
-        PendingIntent arrivedPendingIntent=PendingIntent.getActivity(context,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
-        RemoteViews headUpView=new RemoteViews("com.example.guans.arrivied",R.layout.arrived_notification_head_up_view);
-        final Notification notification=new android.support.v7.app.NotificationCompat.Builder(context)
+        PendingIntent arrivedPendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        RemoteViews headUpView = new RemoteViews("com.example.guans.arrivied", R.layout.arrived_notification_head_up_view);
+        final Notification notification = new android.support.v7.app.NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.bus_station)
                 .setContentTitle("Arrived 友情提示")
                 .setContentText("您已经到达" + (stationItem == null ? "" : stationItem.getBusStationName()) + "，请准备下车,滑动或点击停止提醒")
@@ -88,13 +89,13 @@ public class GeoFenceReceiver extends BroadcastReceiver {
                 .setContentIntent(arrivedPendingIntent)
                 .setCustomHeadsUpContentView(headUpView)
                 .setPriority(Notification.PRIORITY_MAX)
-                .setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE)
 //                .setFullScreenIntent(arrivedPendingIntent,false)
                 .build();
-        notification.flags=Notification.FLAG_INSISTENT|Notification.FLAG_AUTO_CANCEL;
+        notification.flags = Notification.FLAG_INSISTENT | Notification.FLAG_AUTO_CANCEL;
 //        notification.flags=Notification.FLAG_ONLY_ALERT_ONCE|Notification.FLAG_AUTO_CANCEL;
-        final NotificationManager notificationManager= (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(GeoFenceService.ARRIVED_NOTIFICATION_ID,notification);
+        final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(GeoFenceService.ARRIVED_NOTIFICATION_ID, notification);
 //        if(Build.VERSION.SDK_INT <Build.VERSION_CODES.LOLLIPOP){
 //            HeadUpManager headUpManager=new HeadUpManager(context);
 //            LayoutInflater layoutInflater= (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -102,10 +103,11 @@ public class GeoFenceReceiver extends BroadcastReceiver {
 //            headUpManager.showHeadUp(view,GeoFenceService.ARRIVED_NOTIFICATION_ID);
 //        }
         if (!CheckSystemActive.isScreenOn(context) || CheckSystemActive.isKeyLocked(context))
-        startNotifiedActivity(context, intent);
+            startNotifiedActivity(context, intent);
     }
-    private void startNotifiedActivity(Context context,Intent intent){
-        Intent notificationIntent=new Intent(context, NoticeActivity.class);
+
+    private void startNotifiedActivity(Context context, Intent intent) {
+        Intent notificationIntent = new Intent(context, NoticeActivity.class);
         notificationIntent.addFlags(FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(notificationIntent);
     }

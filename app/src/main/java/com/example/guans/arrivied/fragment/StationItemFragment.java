@@ -40,15 +40,15 @@ public class StationItemFragment extends Fragment implements LineAdapter.OnStati
             busLineItem = getArguments().getParcelable("LINE_ITEM");
         }
 
-        lineAdapter=new LineAdapter(getActivity(),busLineItem);
+        lineAdapter = new LineAdapter(getActivity(), busLineItem);
         lineAdapter.setStationItemClickListener(this);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view=inflater.inflate(R.layout.fragment_station_item, container, false);
-        stationList=view.findViewById(R.id.stationList);
+        View view = inflater.inflate(R.layout.fragment_station_item, container, false);
+        stationList = view.findViewById(R.id.stationList);
         stationList.setLayoutManager(new LinearLayoutManager(getContext()));
         stationList.setAdapter(lineAdapter);
         stationList.addItemDecoration(new ItemDivider());
@@ -77,8 +77,9 @@ public class StationItemFragment extends Fragment implements LineAdapter.OnStati
         super.onDetach();
         mListener = null;
     }
-    public void flush(){
-        busLineItem=getArguments().getParcelable("LINE_ITEM");
+
+    public void flush() {
+        busLineItem = getArguments().getParcelable("LINE_ITEM");
         lineAdapter.setBusLineItem(busLineItem);
     }
 
@@ -90,6 +91,7 @@ public class StationItemFragment extends Fragment implements LineAdapter.OnStati
 
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
+
         void onStationItemClick(BusStationItem busStationItem);
     }
 }

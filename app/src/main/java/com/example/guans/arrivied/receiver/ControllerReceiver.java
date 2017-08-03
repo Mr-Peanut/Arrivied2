@@ -10,12 +10,15 @@ import android.content.Intent;
 
 public class ControllerReceiver extends BroadcastReceiver {
     private ControlReceiveListener mListener;
-    private ControllerReceiver(){}
-    public ControllerReceiver(Context context){
-        if(!(context instanceof ControlReceiveListener)){
+
+    private ControllerReceiver() {
+    }
+
+    public ControllerReceiver(Context context) {
+        if (!(context instanceof ControlReceiveListener)) {
             throw new IllegalArgumentException("service must implement ControlReceiveListener ");
         }
-        mListener= (ControlReceiveListener) context;
+        mListener = (ControlReceiveListener) context;
     }
 
     public void setControlListener(ControlReceiveListener mListener) {
@@ -24,10 +27,11 @@ public class ControllerReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if(mListener!=null){
+        if (mListener != null) {
             mListener.onControlBroadcastReceive(intent);
         }
     }
+
     public interface ControlReceiveListener {
         void onControlBroadcastReceive(Intent intent);
     }

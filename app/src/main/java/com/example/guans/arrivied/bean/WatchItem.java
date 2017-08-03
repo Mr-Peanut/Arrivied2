@@ -11,12 +11,28 @@ import com.amap.api.services.busline.BusStationItem;
  */
 
 public class WatchItem implements Parcelable {
+    public static final Creator<WatchItem> CREATOR = new Creator<WatchItem>() {
+        @Override
+        public WatchItem createFromParcel(Parcel in) {
+            return new WatchItem(in);
+        }
+
+        @Override
+        public WatchItem[] newArray(int size) {
+            return new WatchItem[size];
+        }
+    };
     private BusLineItem busLineItem;
     private BusStationItem busStationItem;
 
     public WatchItem(BusLineItem busLineItem, BusStationItem busStationItem) {
         this.busLineItem = busLineItem;
         this.busStationItem = busStationItem;
+    }
+
+    protected WatchItem(Parcel in) {
+        busLineItem = in.readParcelable(BusLineItem.class.getClassLoader());
+        busStationItem = in.readParcelable(BusStationItem.class.getClassLoader());
     }
 
     public BusLineItem getBusLineItem() {
@@ -35,11 +51,6 @@ public class WatchItem implements Parcelable {
         this.busStationItem = busStationItem;
     }
 
-    protected WatchItem(Parcel in) {
-        busLineItem = in.readParcelable(BusLineItem.class.getClassLoader());
-        busStationItem = in.readParcelable(BusStationItem.class.getClassLoader());
-    }
-
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(busLineItem, flags);
@@ -50,16 +61,4 @@ public class WatchItem implements Parcelable {
     public int describeContents() {
         return 0;
     }
-
-    public static final Creator<WatchItem> CREATOR = new Creator<WatchItem>() {
-        @Override
-        public WatchItem createFromParcel(Parcel in) {
-            return new WatchItem(in);
-        }
-
-        @Override
-        public WatchItem[] newArray(int size) {
-            return new WatchItem[size];
-        }
-    };
 }

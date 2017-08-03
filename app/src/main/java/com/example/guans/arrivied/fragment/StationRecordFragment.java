@@ -189,6 +189,7 @@ public class StationRecordFragment extends Fragment implements StationRecordAdap
 
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
+
         void onRecordItemSelected(WatchItem watchItem);
 
         void showProgressBar();

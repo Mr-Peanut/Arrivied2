@@ -76,6 +76,7 @@ public class StationRecordAdapter extends RecyclerView.Adapter<StationRecordAdap
             cursor.close();
         }
     }
+
     public void setRecordClickedListener(RecordClickedListener recordClickedListener) {
         this.recordClickedListener = recordClickedListener;
     }

@@ -16,7 +16,7 @@ import com.example.guans.arrivied.R;
  * Created by guans on 2017/7/15.
  */
 
-public class LineAdapter extends RecyclerView.Adapter <LineAdapter.StationItemHolder>{
+public class LineAdapter extends RecyclerView.Adapter<LineAdapter.StationItemHolder> {
     private Context mContext;
     private BusLineItem busLineItem;
     private OnStationItemClickListener stationItemClickListener;
@@ -38,11 +38,11 @@ public class LineAdapter extends RecyclerView.Adapter <LineAdapter.StationItemHo
     @Override
     public StationItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.text_item_layout, parent, false);
-        final StationItemHolder stationItemHolder=new StationItemHolder(view);
+        final StationItemHolder stationItemHolder = new StationItemHolder(view);
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               stationItemClickListener.onStationItemClick(busLineItem.getBusStations().get(stationItemHolder.getAdapterPosition()));
+                stationItemClickListener.onStationItemClick(busLineItem.getBusStations().get(stationItemHolder.getAdapterPosition()));
             }
         });
         return stationItemHolder;
@@ -55,7 +55,7 @@ public class LineAdapter extends RecyclerView.Adapter <LineAdapter.StationItemHo
 
     @Override
     public int getItemCount() {
-        if(busLineItem!=null)
+        if (busLineItem != null)
             return busLineItem.getBusStations().size();
         return 0;
     }
@@ -64,13 +64,14 @@ public class LineAdapter extends RecyclerView.Adapter <LineAdapter.StationItemHo
         void onStationItemClick(BusStationItem busStationItem);
     }
 
-    class StationItemHolder extends RecyclerView.ViewHolder{
+    class StationItemHolder extends RecyclerView.ViewHolder {
         LinearLayout itemRootView;
         TextView itemView;
+
         StationItemHolder(View view) {
             super(view);
-            itemRootView=view.findViewById(R.id.text_item_root);
-            itemView=view.findViewById(R.id.text_item);
+            itemRootView = view.findViewById(R.id.text_item_root);
+            itemView = view.findViewById(R.id.text_item);
         }
     }
 }

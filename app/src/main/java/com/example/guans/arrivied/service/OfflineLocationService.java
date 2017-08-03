@@ -21,6 +21,7 @@ public class OfflineLocationService extends Service implements LocationListener 
     private DPoint stationPoint;
     private float warningLength;
     private GPS2AMap gps2AMap;
+
     public OfflineLocationService() {
     }
 

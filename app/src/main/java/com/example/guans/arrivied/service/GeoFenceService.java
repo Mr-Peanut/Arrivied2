@@ -91,6 +91,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
 
     public GeoFenceService() {
     }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -117,6 +118,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
 //         monitorServiceConnection=new MonitorConnection();
 //         bindService(monitorService,monitorServiceConnection,BIND_AUTO_CREATE);
     }
+
     private void registerReceivers() {
         screenChangeReceiver = new ScreenChangeReceiver(this);
         controller = new ControllerReceiver(this);
@@ -146,6 +148,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         isWatching = true;
         return Service.START_NOT_STICKY;
     }
+
     /*
      *息屏时保证系统不休眠
      */
@@ -182,7 +185,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         watchItem = intent.getParcelableExtra("TARGET_ITEM");
         stationItem = watchItem.getBusStationItem();
         busLineItem = watchItem.getBusLineItem();
-        if (busLineItem.getBusLineType().contains("地铁")) {
+        if (busLineItem.getBusLineType().contains("地铁") || busLineItem.getBusLineType().contains("轻轨")) {
             r = 1000.0f;
         } else {
             r = 500f;
