@@ -238,7 +238,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
 
     private void startWatch() {
         startWatchingNotification();
-        handler.removeCallbacks(tryAddDeoFenceAgainRunnable);
+//        handler.removeCallbacks(tryAddDeoFenceAgainRunnable);
         stationsRecordHelper.insertData(watchItem);
         //发送一个广播通知UI控件更新状态
         //更改该服务到前台通知
@@ -292,6 +292,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     @Override
     public void onGeoPointRemoved() {
         stopForeground(true);
+
         if (alarmPendingIntent != null)
             offlineLocationClient.removeProximityAlert(alarmPendingIntent);
         Intent removeGeoFenceIntent = new Intent(ACTION_GEOFENCE_REMOVED);

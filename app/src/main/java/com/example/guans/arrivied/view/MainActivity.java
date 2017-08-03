@@ -361,7 +361,8 @@ public class MainActivity extends AppCompatActivity implements ControllerReceive
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             geoFenceClientProxy = (GeoFenceClientProxy) iBinder;
-            if (geoFenceClientProxy != null && geoFenceClientProxy.getGeoFences() != null && geoFenceClientProxy.getGeoFences().size() != 0) {
+//            if (geoFenceClientProxy != null && geoFenceClientProxy.getGeoFences() != null && geoFenceClientProxy.getGeoFences().size() != 0) {
+            if (geoFenceClientProxy.getWatchItem() != null) {
                 onWatchItem = geoFenceClientProxy.getWatchItem();
                 showWatchInfoFragment();
             }
