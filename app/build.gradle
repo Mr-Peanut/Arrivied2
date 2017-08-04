@@ -29,6 +29,11 @@ android {
             signingConfig signingConfigs.config
         }
     }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
 }
 
 dependencies {

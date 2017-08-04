@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.guans.arrivied">
 
     <uses-permission android:name="android.permission.LOCATION_HARDWARE" />
@@ -20,6 +21,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <!-- 用于写入缓存数据到扩展存储卡 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <!-- 用于申请调用A-GPS模块 -->
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -28,17 +30,18 @@
 
     <application
         android:name=".application.ArrivedApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@drawable/bus_station"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <!-- android:roundIcon="@mipmap/ic_launcher_round" -->
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="571282966fe766c83a8438c95beeb7d2" />
-
+        <meta-data
+            android:name="com.baidu.lbsapi.API_KEY"
+            android:value="zamKORm4lXpyvoAhOjG7PBL6GFaylw9f" />
         <activity
             android:name=".view.MainActivity"
             android:launchMode="singleTask"
@@ -46,13 +49,10 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <service android:name="com.amap.api.location.APSService" />
-
         <activity
             android:name=".process.LiveActivity"
             android:excludeFromRecents="true"
@@ -60,7 +60,6 @@
             android:finishOnTaskLaunch="false"
             android:launchMode="singleInstance"
             android:theme="@style/LiveActivityStyle" />
-
         <service
             android:name=".service.LocateService"
             android:enabled="true"
@@ -69,6 +68,10 @@
                 <action android:name="com.example.guan.arrived.loctionservice.SERVICE_BIND" />
             </intent-filter>
         </service>
+        <service
+            android:name="com.baidu.location.f"
+            android:enabled="true"
+            android:process=":remote" />
         <service
             android:name=".service.GeoFenceService"
             android:enabled="true"
@@ -79,7 +82,6 @@
                 <action android:name="com.example.guan.arrived.geofenceservice.SERVICE_BIND" />
             </intent-filter>
         </service>
-
         <activity
             android:name=".view.MapActivity"
             android:screenOrientation="portrait"
@@ -87,8 +89,7 @@
         <activity
             android:name=".view.SearchActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
-
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <receiver
             android:name=".receiver.GeoFenceReceiver"
             android:enabled="true"
@@ -98,31 +99,29 @@
                 <action android:name="com.example.guans.arrivied.service.GeoFenceService.ARRIVED_PROXIMITY" />
             </intent-filter>
         </receiver>
-
         <service
             android:name=".service.OfflineLocationService"
             android:enabled="true"
             android:exported="false" />
-
         <activity
             android:name=".view.NoticeActivity"
             android:exported="true"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:theme="@style/FullScreenTheme"></activity>
+            android:theme="@style/FullScreenTheme" />
         <activity
             android:name=".view.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".view.MainActivity">
+            android:parentActivityName=".view.MainActivity"
+            tools:targetApi="jelly_bean">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.guans.arrivied.view.MainActivity" />
         </activity>
-
         <service
             android:name=".service.MonitorService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="false" />
     </application>
 
 </manifest>
