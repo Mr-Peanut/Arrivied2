@@ -27,41 +27,7 @@ import static com.amap.api.fence.GeoFenceClient.GEOFENCE_STAYED;
 
 public class GeoFenceReceiver extends BroadcastReceiver {
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        switch (intent.getAction()) {
-            case "com.location.apis.geofencedemo.broadcast":
-                //获取Bundle
-                Bundle bundle = intent.getExtras();
-//获取围栏行为：
-                int status = bundle.getInt(GeoFence.BUNDLE_KEY_FENCESTATUS);
-//获取自定义的围栏标识：
-                String customId = bundle.getString(GeoFence.BUNDLE_KEY_CUSTOMID);
-//获取围栏ID:
-                String fenceId = bundle.getString(GeoFence.BUNDLE_KEY_FENCEID);
-//获取当前有触发的围栏对象：
-                GeoFence fence = bundle.getParcelable(GeoFence.BUNDLE_KEY_FENCE);
-                switch (status) {
-                    case GEOFENCE_IN:
-                        Toast.makeText(context, "GEOFENCE_IN", Toast.LENGTH_SHORT).show();
-                        notifyArrived(context, intent);
-                        break;
-                    case GEOFENCE_OUT:
-                        LOGUtil.logE(context, "GEOFENCE_OUT" + context.toString());
-                        break;
-                    case GEOFENCE_STAYED:
-                        break;
-                }
-                break;
-            case GeoFenceService.ARRIVED_PROXIMITY_ACTION:
-                if (intent.getBooleanExtra(KEY_PROXIMITY_ENTERING, false))
-                    notifyArrived(context, intent);
-                break;
-        }
-
-    }
-
-    private void notifyArrived(final Context context, final Intent intent) {
+    public static void notifyArrived(final Context context, final Intent intent) {
         Intent arrivedIntent = new Intent(GeoFenceService.ARRIVED_ACTION);
         context.sendBroadcast(arrivedIntent);
 //        Handler handler=new Handler(Looper.getMainLooper());
@@ -73,7 +39,7 @@ public class GeoFenceReceiver extends BroadcastReceiver {
 //        },20*1000);
     }
 
-    private void startNotification(Context context, Intent intent) {
+    private static void startNotification(Context context, Intent intent) {
         Intent intent2 = new Intent(context, MainActivity.class);
         intent2.setFlags(FLAG_ACTIVITY_NEW_TASK);
         BusStationItem stationItem = intent.getParcelableExtra("TARGET_ITEM");
@@ -106,9 +72,43 @@ public class GeoFenceReceiver extends BroadcastReceiver {
             startNotifiedActivity(context, intent);
     }
 
-    private void startNotifiedActivity(Context context, Intent intent) {
+    private static void startNotifiedActivity(Context context, Intent intent) {
         Intent notificationIntent = new Intent(context, NoticeActivity.class);
         notificationIntent.addFlags(FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(notificationIntent);
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        switch (intent.getAction()) {
+            case "com.location.apis.geofencedemo.broadcast":
+                //获取Bundle
+                Bundle bundle = intent.getExtras();
+//获取围栏行为：
+                int status = bundle.getInt(GeoFence.BUNDLE_KEY_FENCESTATUS);
+//获取自定义的围栏标识：
+                String customId = bundle.getString(GeoFence.BUNDLE_KEY_CUSTOMID);
+//获取围栏ID:
+                String fenceId = bundle.getString(GeoFence.BUNDLE_KEY_FENCEID);
+//获取当前有触发的围栏对象：
+                GeoFence fence = bundle.getParcelable(GeoFence.BUNDLE_KEY_FENCE);
+                switch (status) {
+                    case GEOFENCE_IN:
+                        Toast.makeText(context, "GEOFENCE_IN", Toast.LENGTH_SHORT).show();
+                        notifyArrived(context, intent);
+                        break;
+                    case GEOFENCE_OUT:
+                        LOGUtil.logE(context, "GEOFENCE_OUT" + context.toString());
+                        break;
+                    case GEOFENCE_STAYED:
+                        break;
+                }
+                break;
+            case GeoFenceService.ARRIVED_PROXIMITY_ACTION:
+                if (intent.getBooleanExtra(KEY_PROXIMITY_ENTERING, false))
+                    notifyArrived(context, intent);
+                break;
+        }
+
     }
 }

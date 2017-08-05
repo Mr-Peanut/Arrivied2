@@ -38,6 +38,7 @@ import com.example.guans.arrivied.database.StationsRecordHelper;
 import com.example.guans.arrivied.process.LiveActivity;
 import com.example.guans.arrivied.process.ScreenChangeReceiver;
 import com.example.guans.arrivied.receiver.ControllerReceiver;
+import com.example.guans.arrivied.receiver.GeoFenceReceiver;
 import com.example.guans.arrivied.util.LOGUtil;
 import com.example.guans.arrivied.view.MainActivity;
 
@@ -424,7 +425,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         public void onNotify(BDLocation bdLocation, float v) {
             if (v <= r) {
                 Toast.makeText(getApplicationContext(), "距离目标站点还有" + String.valueOf(v) + "米", Toast.LENGTH_SHORT).show();
-                sendBroadcast(alarmIntent);
+//                sendBroadcast(alarmIntent);
+                GeoFenceReceiver.notifyArrived(GeoFenceService.this, alarmIntent);
             }
         }
     }
