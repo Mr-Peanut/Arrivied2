@@ -433,13 +433,12 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                     alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, (long) ((distance - 1000) / 20.0 * 1000), bdLocatePendingIntent);
                 } else {
                     alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, (long) ((distance - 1000) / 20.0 * 1000), bdLocatePendingIntent);
-
                 }
             } else if (distance <= 1000 && distance > r) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, (long) ((distance - r) / 20.0 * 1000), bdLocatePendingIntent);
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, Math.max((long) ((distance - r) / 20.0 * 1000), 30 * 1000), bdLocatePendingIntent);
                 } else {
-                    alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, (long) ((distance - r) / 20.0 * 1000), bdLocatePendingIntent);
+                    alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, Math.max((long) ((distance - r) / 20.0 * 1000), 30 * 1000), bdLocatePendingIntent);
                 }
             } else {
                 GeoFenceReceiver.notifyArrived(GeoFenceService.this, alarmIntent);
@@ -448,6 +447,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             locateCount++;
             if (locateCount >= 5) {
                 notifyLocateError();
+                alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, 3 * 60 * 1000, bdLocatePendingIntent);
+                locateCount = 0;
                 baiduLocationClient.stop();
             }
         }
