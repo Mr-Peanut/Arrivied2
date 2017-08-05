@@ -116,7 +116,7 @@ public class MonitorService extends Service implements ControllerReceiver.Contro
     public void onLocationChanged(AMapLocation aMapLocation) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             switch (aMapLocation.getErrorCode()) {
-                case 1000:
+                case 0:
                     float distance = AMapUtils.calculateLineDistance(new LatLng(aMapLocation.getLatitude(), aMapLocation.getLongitude()), LatLonPointTransferLatLon.getLatLonFromLatLngPoint(watchItem.getBusStationItem().getLatLonPoint()));
                     if (distance >= 1000) {
                         alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, (long) ((distance - 1000) / 18 * 1000), locationPendingIntent);
