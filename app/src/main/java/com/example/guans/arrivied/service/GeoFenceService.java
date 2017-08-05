@@ -26,6 +26,10 @@ import com.amap.api.fence.GeoFenceListener;
 import com.amap.api.location.DPoint;
 import com.amap.api.services.busline.BusLineItem;
 import com.amap.api.services.busline.BusStationItem;
+import com.baidu.location.BDLocation;
+import com.baidu.location.BDNotifyListener;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
 import com.example.guans.arrivied.R;
 import com.example.guans.arrivied.bean.GeoFenceClientProxy;
 import com.example.guans.arrivied.bean.OfflineLocationClient;
@@ -42,6 +46,7 @@ import java.util.List;
 import static com.amap.api.fence.GeoFenceClient.GEOFENCE_IN;
 import static com.amap.api.fence.GeoFenceClient.GEOFENCE_OUT;
 import static com.amap.api.fence.GeoFenceClient.GEOFENCE_STAYED;
+import static com.baidu.location.LocationClientOption.LOC_SENSITIVITY_HIGHT;
 
 public class GeoFenceService extends Service implements ControllerReceiver.ControlReceiveListener, GeoFenceListener, GeoFenceClientProxy.GenFenceTaskObserver, ScreenChangeReceiver.OnBroadcastReceiveListener {
     public static final int ADD_DPOINT = 1;
@@ -87,7 +92,11 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     private Intent alarmIntent;
     private PowerManager pm;
     private Intent monitorService;
+    private BDNotifyListener notifyListener;
+    private LocationClient baiduLocationClient;
     private MonitorConnection monitorServiceConnection;
+    private LocationClientOption locationClientOption;
+    private NotifyListener bdNotifyListener;
 
     public GeoFenceService() {
     }
@@ -103,6 +112,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             mGeoFenceClient.setGeoFenceListener(this);
         }
         registerReceivers();
+        initBDLocationClient();
         alarmIntent = new Intent(ARRIVED_PROXIMITY_ACTION);
         handler = new Handler(getMainLooper());
         offlineLocationClient = new OfflineLocationClient(this);
@@ -111,6 +121,19 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         stationsRecordHelper = new StationsRecordHelper(this.getApplicationContext(), StationsRecordHelper.DATABASE_NAME, null, 1);
         bindMonitorService();
+    }
+
+    private void initBDLocationClient() {
+        baiduLocationClient = new LocationClient(getApplicationContext());
+        locationClientOption = new LocationClientOption();
+        locationClientOption.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
+        locationClientOption.setIsNeedAddress(false);
+        locationClientOption.setIsNeedLocationDescribe(false);
+        locationClientOption.setLocationNotify(true);
+        locationClientOption.setIsNeedAltitude(false);
+        locationClientOption.setNeedDeviceDirect(false);
+        locationClientOption.setOpenAutoNotifyMode(3 * 60 * 1000, 300, LOC_SENSITIVITY_HIGHT);
+        baiduLocationClient.setLocOption(locationClientOption);
     }
 
     private void bindMonitorService() {
@@ -190,6 +213,13 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         } else {
             r = 500f;
         }
+        if (bdNotifyListener == null) {
+            bdNotifyListener = new NotifyListener();
+        }
+        bdNotifyListener.SetNotifyLocation(stationItem.getLatLonPoint().getLatitude(), stationItem.getLatLonPoint().getLongitude(), r, "gcj02");
+        baiduLocationClient.registerNotify(bdNotifyListener);
+        baiduLocationClient.start();
+        baiduLocationClient.requestNotifyLocation();
         mGeoFenceClientProxy.setBusStationItem(stationItem);
         mGeoFenceClientProxy.setWatchItem(watchItem);
 //        addGeoFence(stationItem);
@@ -292,7 +322,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     @Override
     public void onGeoPointRemoved() {
         stopForeground(true);
-
+        baiduLocationClient.removeNotifyEvent(bdNotifyListener);
+        baiduLocationClient.stop();
         if (alarmPendingIntent != null)
             offlineLocationClient.removeProximityAlert(alarmPendingIntent);
         Intent removeGeoFenceIntent = new Intent(ACTION_GEOFENCE_REMOVED);
@@ -385,6 +416,16 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
 
+        }
+    }
+
+    private class NotifyListener extends BDNotifyListener {
+        @Override
+        public void onNotify(BDLocation bdLocation, float v) {
+            if (v <= r) {
+                Toast.makeText(getApplicationContext(), "距离目标站点还有" + String.valueOf(v) + "米", Toast.LENGTH_SHORT).show();
+                sendBroadcast(alarmIntent);
+            }
         }
     }
 
