@@ -2,13 +2,12 @@ package com.example.guans.arrivied.service;
 
 import android.app.AlarmManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -24,9 +23,12 @@ import com.amap.api.fence.GeoFence;
 import com.amap.api.fence.GeoFenceClient;
 import com.amap.api.fence.GeoFenceListener;
 import com.amap.api.location.DPoint;
+import com.amap.api.maps2d.AMapUtils;
+import com.amap.api.maps2d.model.LatLng;
 import com.amap.api.services.busline.BusLineItem;
 import com.amap.api.services.busline.BusStationItem;
 import com.baidu.location.BDLocation;
+import com.baidu.location.BDLocationListener;
 import com.baidu.location.BDNotifyListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
@@ -40,6 +42,7 @@ import com.example.guans.arrivied.process.ScreenChangeReceiver;
 import com.example.guans.arrivied.receiver.ControllerReceiver;
 import com.example.guans.arrivied.receiver.GeoFenceReceiver;
 import com.example.guans.arrivied.util.LOGUtil;
+import com.example.guans.arrivied.util.LatLonPointTransferLatLon;
 import com.example.guans.arrivied.view.MainActivity;
 
 import java.util.List;
@@ -49,7 +52,7 @@ import static com.amap.api.fence.GeoFenceClient.GEOFENCE_OUT;
 import static com.amap.api.fence.GeoFenceClient.GEOFENCE_STAYED;
 import static com.baidu.location.LocationClientOption.LOC_SENSITIVITY_HIGHT;
 
-public class GeoFenceService extends Service implements ControllerReceiver.ControlReceiveListener, GeoFenceListener, GeoFenceClientProxy.GenFenceTaskObserver, ScreenChangeReceiver.OnBroadcastReceiveListener {
+public class GeoFenceService extends Service implements ControllerReceiver.ControlReceiveListener, GeoFenceListener, GeoFenceClientProxy.GenFenceTaskObserver, ScreenChangeReceiver.OnBroadcastReceiveListener, BDLocationListener {
     public static final int ADD_DPOINT = 1;
     //定义接收广播的action字符串
     public static final String GEOFENCE_BROADCAST_ACTION = "com.location.apis.geofencedemo.broadcast";
@@ -63,9 +66,12 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     public static final String ADD_GEOFENCE_SUCCESS_ACTION = "com.example.guan.arrived.geofenceservice.ADD_GEOFENCE_SUCCESS";
     public static final String ARRIVED_ACTION = "com.example.guan.arrived.geofenceservice.ARRIVED";
     public static final String WAKE_UP_ACTION = "com.example.guan.arrived.geofenceservice.WAKE_UP";
+    public static final String BD_LOCATE_ACTION = "com.example.guan.arrived.geofenceservice.BD_LOCATE";
     public static final String ARRIVED_PROXIMITY_ACTION = "com.example.guans.arrivied.service.GeoFenceService.ARRIVED_PROXIMITY";
     public static final int PROXIMITY_REQUEST_CODE = 1001;
+    private static final int LOCATE_ERROR_CODE = 1002;
     private LocationManager locationManager;
+    private int locateCount = 0;
     private StationsRecordHelper stationsRecordHelper;
     private GeoFenceClient mGeoFenceClient;
     private BusStationItem stationItem;
@@ -76,6 +82,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     private ControllerReceiver controller;
     private AlarmManager alarmManager;
     private PendingIntent wakeupPendingIntent;
+    private LatLng stationLatLng;
     private Handler handler;
     private ConnectivityManager connectivityManager;
     private WatchItem watchItem;
@@ -95,9 +102,9 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     private Intent monitorService;
     private BDNotifyListener notifyListener;
     private LocationClient baiduLocationClient;
-    private MonitorConnection monitorServiceConnection;
     private LocationClientOption locationClientOption;
     private NotifyListener bdNotifyListener;
+    private PendingIntent bdLocatePendingIntent;
 
     public GeoFenceService() {
     }
@@ -114,6 +121,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         }
         registerReceivers();
         initBDLocationClient();
+        Intent bdLocateIntent = new Intent(BD_LOCATE_ACTION);
+        bdLocatePendingIntent = PendingIntent.getBroadcast(this, 99, bdLocateIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         alarmIntent = new Intent(ARRIVED_PROXIMITY_ACTION);
         handler = new Handler(getMainLooper());
         offlineLocationClient = new OfflineLocationClient(this);
@@ -135,6 +144,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         locationClientOption.setNeedDeviceDirect(false);
         locationClientOption.setOpenAutoNotifyMode(3 * 60 * 1000, 300, LOC_SENSITIVITY_HIGHT);
         baiduLocationClient.setLocOption(locationClientOption);
+        baiduLocationClient.registerLocationListener(this);
+
     }
 
     private void bindMonitorService() {
@@ -150,6 +161,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         controlIntentFilter.addAction(GEOFENCE_CANCLE_ATCITON);
         controlIntentFilter.addAction(WAKE_UP_ACTION);
         controlIntentFilter.addAction(ARRIVED_ACTION);
+        controlIntentFilter.addAction(BD_LOCATE_ACTION);
         controlIntentFilter.addAction(LocationManager.PROVIDERS_CHANGED_ACTION);
         controlIntentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(controller, controlIntentFilter);
@@ -184,24 +196,22 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
     private void startWatchingNotification() {
         Intent startLaunchActivity = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 100, startLaunchActivity, PendingIntent.FLAG_UPDATE_CURRENT);
-        Notification notification = null;
+        Notification notification;
         RemoteViews remoteViews;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            remoteViews = new RemoteViews(getPackageName(), R.layout.watching_notification_view);
-            Intent cancelIntent = new Intent(GEOFENCE_CANCLE_ATCITON);
-            remoteViews.setOnClickPendingIntent(R.id.cancel_watch, PendingIntent.getBroadcast(getApplicationContext(), 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT));
-            remoteViews.setTextViewText(R.id.station_info, "您设置了" + stationItem.getBusStationName());
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
-            notificationBuilder.setContentTitle("Arrived")
-                    .setContentText("正在监控" + stationItem.getBusStationName() + "\n" + watchItem.getBusLineItem().getBusLineName())
-                    .setSmallIcon(R.drawable.bus_station)
-                    .setWhen(System.currentTimeMillis())
-                    .setContentIntent(pendingIntent)
-                    .setStyle(new NotificationCompat.BigPictureStyle())
-                    .setOngoing(true)
-                    .setCustomBigContentView(remoteViews);
-            notification = notificationBuilder.build();
-        }
+        remoteViews = new RemoteViews(getPackageName(), R.layout.watching_notification_view);
+        Intent cancelIntent = new Intent(GEOFENCE_CANCLE_ATCITON);
+        remoteViews.setOnClickPendingIntent(R.id.cancel_watch, PendingIntent.getBroadcast(getApplicationContext(), 1, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+        remoteViews.setTextViewText(R.id.station_info, "您设置了" + stationItem.getBusStationName());
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
+        notificationBuilder.setContentTitle("Arrived")
+                .setContentText("正在监控" + stationItem.getBusStationName() + "\n" + watchItem.getBusLineItem().getBusLineName())
+                .setSmallIcon(R.drawable.bus_station)
+                .setWhen(System.currentTimeMillis())
+                .setContentIntent(pendingIntent)
+                .setStyle(new NotificationCompat.BigPictureStyle())
+                .setOngoing(true)
+                .setCustomBigContentView(remoteViews);
+        notification = notificationBuilder.build();
         startForeground(ADD_GEOFENCE_ID, notification);
     }
 
@@ -209,6 +219,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         watchItem = intent.getParcelableExtra("TARGET_ITEM");
         stationItem = watchItem.getBusStationItem();
         busLineItem = watchItem.getBusLineItem();
+//        stationLatLng=new LatLng(stationItem.getLatLonPoint().getLatitude(),stationItem.getLatLonPoint().getLongitude());
+        stationLatLng = LatLonPointTransferLatLon.getLatLonFromLatLngPoint(watchItem.getBusStationItem().getLatLonPoint());
         if (busLineItem.getBusLineType().contains("地铁") || busLineItem.getBusLineType().contains("轻轨")) {
             r = 1000.0f;
         } else {
@@ -283,9 +295,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             monitorService.putExtra("R", r);
             startService(monitorService);
-
         }
-
     }
 
     @Override
@@ -398,6 +408,9 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                     Toast.makeText(this, "GPS 不可用，可能会影响定位精度", Toast.LENGTH_SHORT).show();
                 }
                 break;
+            case BD_LOCATE_ACTION:
+                baiduLocationClient.start();
+                break;
         }
 
     }
@@ -407,17 +420,55 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         return netInfo != null && netInfo.isAvailable() && netInfo.isConnected();
     }
 
-    class MonitorConnection implements ServiceConnection {
+    @Override
+    public void onReceiveLocation(BDLocation bdLocation) {
+        int errorCode = bdLocation.getLocType();
+        if (errorCode == 61 || errorCode == 161) {
+            locateCount = 0;
+            baiduLocationClient.stop();
+//            double distance= DistanceUtil.getDistance(new LatLng(bdLocation.getLatitude(),bdLocation.getLongitude()),stationLatLng);
+            float distance = AMapUtils.calculateLineDistance(new com.amap.api.maps2d.model.LatLng(bdLocation.getLatitude(), bdLocation.getLongitude()), stationLatLng);
+            if (distance > 1000) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, (long) ((distance - 1000) / 20.0 * 1000), bdLocatePendingIntent);
+                } else {
+                    alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, (long) ((distance - 1000) / 20.0 * 1000), bdLocatePendingIntent);
 
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-
+                }
+            } else if (distance <= 1000 && distance > r) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, (long) ((distance - r) / 20.0 * 1000), bdLocatePendingIntent);
+                } else {
+                    alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, (long) ((distance - r) / 20.0 * 1000), bdLocatePendingIntent);
+                }
+            } else {
+                GeoFenceReceiver.notifyArrived(GeoFenceService.this, alarmIntent);
+            }
+        } else {
+            locateCount++;
+            if (locateCount >= 5) {
+                notifyLocateError();
+                baiduLocationClient.stop();
+            }
         }
 
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
+    }
 
-        }
+    private void notifyLocateError() {
+        Notification errorNotification = new NotificationCompat.Builder(this)
+                .setTicker("定位出错，GPS或者网络不可用")
+                .setContentTitle("定位出错，GPS或者网络不可用，提醒功能可能不能正常使用")
+                .setContentTitle("定位出错，GPS或者网络不可用")
+                .setAutoCancel(true)
+                .setSmallIcon(R.drawable.bus_station)
+                .build();
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(LOCATE_ERROR_CODE, errorNotification);
+    }
+
+    @Override
+    public void onConnectHotSpotMessage(String s, int i) {
+
     }
 
     private class NotifyListener extends BDNotifyListener {
@@ -430,6 +481,6 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             }
         }
     }
-
-
 }
+
+

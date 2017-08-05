@@ -28,6 +28,7 @@ public class MonitorService extends Service implements ControllerReceiver.Contro
     public static final String ACTION_LOCATION = "com.example.guan.arrived.MonitorService.LOCATION";
     public static final String ACTION_WAKE_UP = "com.example.guan.arrived.MonitorService.WAKE_UP";
     private boolean isLocated = false;
+    private int locateCount = 0;
     private WatchItem watchItem;
     private AlarmManager alarmManager;
     private LocationClient locationClient;
@@ -117,6 +118,7 @@ public class MonitorService extends Service implements ControllerReceiver.Contro
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             switch (aMapLocation.getErrorCode()) {
                 case 0:
+                    locateCount = 0;
                     float distance = AMapUtils.calculateLineDistance(new LatLng(aMapLocation.getLatitude(), aMapLocation.getLongitude()), LatLonPointTransferLatLon.getLatLonFromLatLngPoint(watchItem.getBusStationItem().getLatLonPoint()));
                     if (distance >= 1000) {
                         alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, (long) ((distance - 1000) / 18 * 1000), locationPendingIntent);
@@ -130,7 +132,10 @@ public class MonitorService extends Service implements ControllerReceiver.Contro
                     }
                     break;
                 default:
+                    if (locateCount >= 5)
+                        return;
                     locationClient.startLocateOneTime();
+                    locateCount++;
                     break;
             }
         }
