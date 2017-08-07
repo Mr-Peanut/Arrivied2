@@ -84,7 +84,7 @@ public class MonitorService extends Service implements ControllerReceiver.Contro
     @Override
     public void onDestroy() {
         if (locationClient != null) {
-            locationClient.destory();
+            locationClient.destroy();
         }
         unregisterReceiver(controller);
         cancelMonitor();
@@ -97,14 +97,14 @@ public class MonitorService extends Service implements ControllerReceiver.Contro
     public void onControlBroadcastReceive(Intent intent) {
         switch (intent.getAction()) {
             case ACTION_LOCATION:
-                LOGUtil.logE(this, ACTION_LOCATION);
-                locationClient.startLocateOneTime();
+                LOGUtil.logE(this, "start locate" + ACTION_LOCATION);
+                locationClient.startLocateOneTimeWithoutAddress();
                 isLocated = true;
                 break;
             case ACTION_WAKE_UP:
                 if (!CheckSystemActive.isScreenOn(this)) {
                     if (!isLocated) {
-                        locationClient.startLocateOneTime();
+                        locationClient.startLocateOneTimeWithoutAddress();
                         isLocated = true;
                     }
                 } else {
@@ -124,6 +124,7 @@ public class MonitorService extends Service implements ControllerReceiver.Contro
                     float distance = AMapUtils.calculateLineDistance(new LatLng(aMapLocation.getLatitude(), aMapLocation.getLongitude()), LatLonPointTransferLatLon.getLatLonFromLatLngPoint(watchItem.getBusStationItem().getLatLonPoint()));
                     LOGUtil.logE(this, String.valueOf(distance));
                     alarmManager.cancel(locationPendingIntent);
+                    LOGUtil.logE(this, String.valueOf((long) ((distance - 1000) / 18)));
                     if (distance >= 1000) {
                         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, (long) ((distance - 1000) / 18 * 1000), locationPendingIntent);
                     } else if (distance > r) {
@@ -138,7 +139,7 @@ public class MonitorService extends Service implements ControllerReceiver.Contro
                 default:
                     if (locateCount >= 5)
                         return;
-                    locationClient.startLocateOneTime();
+                    locationClient.startLocateOneTimeWithoutAddress();
                     locateCount++;
                     break;
             }

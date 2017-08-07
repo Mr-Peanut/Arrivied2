@@ -42,6 +42,15 @@ public class LocationClient extends Binder {
         mLocationClient.startLocation();
     }
 
+    public void startLocateOneTimeWithoutAddress() {
+        stopLocation();
+        LOGUtil.logE(this, mLocationClient.toString());
+        mLocationOption.setOnceLocation(true);
+        mLocationOption.setNeedAddress(false);
+        mLocationClient.setLocationOption(mLocationOption);
+        mLocationClient.startLocation();
+    }
+
     public void startLocateAlways() {
         stopLocation();
         mLocationOption.setOnceLocation(false);
@@ -59,7 +68,7 @@ public class LocationClient extends Binder {
             mLocationClient.stopLocation();
     }
 
-    public void destory() {
+    public void destroy() {
         mLocationClient.onDestroy();
     }
 }
