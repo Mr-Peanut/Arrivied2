@@ -234,7 +234,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         bdNotifyListener.SetNotifyLocation(stationItem.getLatLonPoint().getLatitude(), stationItem.getLatLonPoint().getLongitude(), r, "gcj02");
         baiduLocationClient.registerNotify(bdNotifyListener);
         baiduLocationClient.start();
-        baiduLocationClient.requestNotifyLocation();
+//        baiduLocationClient.requestNotifyLocation();
         mGeoFenceClientProxy.setBusStationItem(stationItem);
         mGeoFenceClientProxy.setWatchItem(watchItem);
 //        addGeoFence(stationItem);
@@ -341,7 +341,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             offlineLocationClient.removeProximityAlert(alarmPendingIntent);
         Intent removeGeoFenceIntent = new Intent(ACTION_GEOFENCE_REMOVED);
         isWatching = false;
-        alarmManager.cancel(wakeupPendingIntent);
+//        alarmManager.cancel(wakeupPendingIntent);
         if (wakeLock.isHeld()) {
             LOGUtil.logE(this, "releaseLock");
             wakeLock.release();
@@ -394,7 +394,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                 mGeoFenceClientProxy.removeDPoint();
                 if (wakeLock.isHeld())
                     wakeLock.release();
-                alarmManager.cancel(wakeupPendingIntent);
+//                alarmManager.cancel(wakeupPendingIntent);
                 watchItem = null;
                 LOGUtil.logE(this, "arrived");
                 stopSelf();
