@@ -137,6 +137,8 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         baiduLocationClient = new LocationClient(getApplicationContext());
         locationClientOption = new LocationClientOption();
         locationClientOption.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
+        int span = 1000;
+        locationClientOption.setScanSpan(span);
         locationClientOption.setIsNeedAddress(false);
         locationClientOption.setIsNeedLocationDescribe(false);
         locationClientOption.setLocationNotify(true);
@@ -172,7 +174,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         //保持cpu一直运行，不管屏幕是否黑屏
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CPUKeepRunning");
         alarmManager = (AlarmManager) getSystemService(Service.ALARM_SERVICE);
-        wakeupPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(WAKE_UP_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
+//        wakeupPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(WAKE_UP_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     @Override
@@ -410,6 +412,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                 break;
             case BD_LOCATE_ACTION:
                 baiduLocationClient.start();
+                baiduLocationClient.requestLocation();
                 LOGUtil.logE(this, "开始定位" + BD_LOCATE_ACTION);
                 break;
         }
@@ -428,7 +431,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
         LOGUtil.logE(this, String.valueOf(errorCode));
         if (errorCode == 61 || errorCode == 161) {
             locateCount = 0;
-//            baiduLocationClient.stop();
+            baiduLocationClient.stop();
 //            double distance= DistanceUtil.getDistance(new LatLng(bdLocation.getLatitude(),bdLocation.getLongitude()),stationLatLng);
             float distance = AMapUtils.calculateLineDistance(new com.amap.api.maps2d.model.LatLng(bdLocation.getLatitude(), bdLocation.getLongitude()), stationLatLng);
             LOGUtil.logE(this, "next time" + String.valueOf((long) ((distance - 1000) / 20.0 * 1000)));
