@@ -78,7 +78,6 @@ public class MonitorService extends Service implements ControllerReceiver.Contro
 
     private void cancelMonitor() {
         isLocated = false;
-        alarmManager.cancel(wakeupPendingIntent);
         alarmManager.cancel(locationPendingIntent);
     }
 
@@ -89,6 +88,7 @@ public class MonitorService extends Service implements ControllerReceiver.Contro
         }
         unregisterReceiver(controller);
         cancelMonitor();
+        alarmManager.cancel(wakeupPendingIntent);
         stopForeground(true);
         super.onDestroy();
     }
