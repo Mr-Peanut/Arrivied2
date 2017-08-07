@@ -9,7 +9,7 @@ import com.amap.api.services.core.LatLonPoint;
 
 public class LatLonPointTransferLatLon {
     public static LatLng getLatLonFromLatLngPoint(LatLonPoint latLonPoint) {
-        return new LatLng(latLonPoint.getLatitude(), latLonPoint.getLatitude());
+        return new LatLng(latLonPoint.getLatitude(), latLonPoint.getLongitude());
     }
 
     public static LatLonPoint getLatLonPointFromLatLon(LatLng latLng) {

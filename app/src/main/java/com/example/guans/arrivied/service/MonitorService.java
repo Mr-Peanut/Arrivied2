@@ -19,6 +19,7 @@ import com.example.guans.arrivied.bean.LocationClient;
 import com.example.guans.arrivied.bean.WatchItem;
 import com.example.guans.arrivied.receiver.ControllerReceiver;
 import com.example.guans.arrivied.util.CheckSystemActive;
+import com.example.guans.arrivied.util.LOGUtil;
 import com.example.guans.arrivied.util.LatLonPointTransferLatLon;
 
 import static com.example.guans.arrivied.service.GeoFenceService.MONITOR_NOTIFICATION_ID;
@@ -65,7 +66,7 @@ public class MonitorService extends Service implements ControllerReceiver.Contro
         watchItem = intent.getParcelableExtra("TARGET_ITEM");
         r = intent.getFloatExtra("R", 500);
         stationItem = watchItem.getBusStationItem();
-        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 5000, 60 * 1000, wakeupPendingIntent);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 5000, 60 * 1000, wakeupPendingIntent);
         Notification monitorNotification = new NotificationCompat.Builder(this)
                 .setContentText("守护进程")
                 .setContentTitle("守护进程正在运行")
@@ -96,6 +97,7 @@ public class MonitorService extends Service implements ControllerReceiver.Contro
     public void onControlBroadcastReceive(Intent intent) {
         switch (intent.getAction()) {
             case ACTION_LOCATION:
+                LOGUtil.logE(this, ACTION_LOCATION);
                 locationClient.startLocateOneTime();
                 isLocated = true;
                 break;
@@ -120,15 +122,17 @@ public class MonitorService extends Service implements ControllerReceiver.Contro
                 case 0:
                     locateCount = 0;
                     float distance = AMapUtils.calculateLineDistance(new LatLng(aMapLocation.getLatitude(), aMapLocation.getLongitude()), LatLonPointTransferLatLon.getLatLonFromLatLngPoint(watchItem.getBusStationItem().getLatLonPoint()));
+                    LOGUtil.logE(this, String.valueOf(distance));
+                    alarmManager.cancel(locationPendingIntent);
                     if (distance >= 1000) {
-                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, (long) ((distance - 1000) / 18 * 1000), locationPendingIntent);
+                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, (long) ((distance - 1000) / 18 * 1000), locationPendingIntent);
                     } else if (distance > r) {
-                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, Math.max((long) (distance / 18 * 1000), 30 * 1000), locationPendingIntent);
+                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, Math.max((long) (distance / 18 * 1000), 30 * 1000), locationPendingIntent);
                     } else {
                         Intent alarmIntent = new Intent();
                         alarmIntent.putExtra("TARGET_ITEM", stationItem);
                         PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(this, PROXIMITY_REQUEST_CODE, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, 0, alarmPendingIntent);
+                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, 0, alarmPendingIntent);
                     }
                     break;
                 default:

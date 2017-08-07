@@ -189,7 +189,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
      *息屏时保证系统不休眠
      */
     private void startAlarmTask() {
-        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 5000, 60 * 1000, wakeupPendingIntent);
+//        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 5000, 60 * 1000, wakeupPendingIntent);
         wakeLock.acquire(3 * 3600 * 1000);
     }
 
@@ -367,7 +367,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
 
     @Override
     public void onControlBroadcastReceive(Intent intent) {
-        LOGUtil.logE(this, intent.getAction());
+        LOGUtil.logE(this, "get receive/" + intent.getAction());
         switch (intent.getAction()) {
             case GEOFENCE_CANCLE_ATCITON:
                 watchItem = null;
@@ -410,6 +410,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
                 break;
             case BD_LOCATE_ACTION:
                 baiduLocationClient.start();
+                LOGUtil.logE(this, "开始定位" + BD_LOCATE_ACTION);
                 break;
         }
 
@@ -422,23 +423,28 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
 
     @Override
     public void onReceiveLocation(BDLocation bdLocation) {
+        LOGUtil.logE(this, "收到定位信息");
         int errorCode = bdLocation.getLocType();
+        LOGUtil.logE(this, String.valueOf(errorCode));
         if (errorCode == 61 || errorCode == 161) {
             locateCount = 0;
-            baiduLocationClient.stop();
+//            baiduLocationClient.stop();
 //            double distance= DistanceUtil.getDistance(new LatLng(bdLocation.getLatitude(),bdLocation.getLongitude()),stationLatLng);
             float distance = AMapUtils.calculateLineDistance(new com.amap.api.maps2d.model.LatLng(bdLocation.getLatitude(), bdLocation.getLongitude()), stationLatLng);
+            LOGUtil.logE(this, "next time" + String.valueOf((long) ((distance - 1000) / 20.0 * 1000)));
+            LOGUtil.logE(this, "distance" + String.valueOf(distance));
+            alarmManager.cancel(bdLocatePendingIntent);
             if (distance > 1000) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, (long) ((distance - 1000) / 20.0 * 1000), bdLocatePendingIntent);
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, (long) ((distance - 1000) / 20.0 * 1000), bdLocatePendingIntent);
                 } else {
-                    alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, (long) ((distance - 1000) / 20.0 * 1000), bdLocatePendingIntent);
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, (long) ((distance - 1000) / 20.0 * 1000), bdLocatePendingIntent);
                 }
             } else if (distance <= 1000 && distance > r) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, Math.max((long) ((distance - r) / 20.0 * 1000), 30 * 1000), bdLocatePendingIntent);
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, Math.max((long) ((distance - r) / 20.0 * 1000), 30 * 1000), bdLocatePendingIntent);
                 } else {
-                    alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, Math.max((long) ((distance - r) / 20.0 * 1000), 30 * 1000), bdLocatePendingIntent);
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, Math.max((long) ((distance - r) / 20.0 * 1000), 30 * 1000), bdLocatePendingIntent);
                 }
             } else {
                 GeoFenceReceiver.notifyArrived(GeoFenceService.this, alarmIntent);
@@ -447,7 +453,7 @@ public class GeoFenceService extends Service implements ControllerReceiver.Contr
             locateCount++;
             if (locateCount >= 5) {
                 notifyLocateError();
-                alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, 3 * 60 * 1000, bdLocatePendingIntent);
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, 3 * 60 * 1000, bdLocatePendingIntent);
                 locateCount = 0;
                 baiduLocationClient.stop();
             }
